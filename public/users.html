@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola User - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 130px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 140px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        .card-custom .card-header-custom {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .card-custom .card-header-custom h2 {
+            color: #2C3E3B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-custom .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        .btn-refresh-header {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        .btn-refresh-header:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateY(-1px);
+        }
+        
+        /* Form styling - SAMA dengan halaman lain */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        textarea.form-control-custom {
+            border-radius: 1.25rem;
+            resize: vertical;
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid #dee2e6;
+            color: #5a6e6a;
+            border-radius: 2rem;
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        .btn-outline-danger-custom {
+            background: transparent;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-outline-danger-custom:hover {
+            background: #FEF3E8;
+            transform: translateY(-1px);
+        }
+        .btn-edit {
+            background: #3A7B70;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-edit:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-delete {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-delete:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Table styling - SAMA dengan halaman lain */
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+            padding: 0.75rem 1rem;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .user-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eef2f8;
+        }
+        
+        /* Badge count */
+        .badge-count {
+            background: #3A7B70;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Toast notification */
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1200;
+            min-width: 250px;
+            padding: 0.75rem 1.25rem;
+            border-radius: 2rem;
+            color: white;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-size: 0.85rem;
+        }
+        .toast-success {
+            background-color: #2C3E3B;
+        }
+        .toast-error {
+            background-color: #F08A5D;
+        }
+        .toast-info {
+            background-color: #4A90E2;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3A7B70;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 105px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .table-custom th, .table-custom td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            .user-photo {
+                width: 32px;
+                height: 32px;
+            }
+            .btn-back-custom, .btn-refresh-header {
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 130px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 140px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-people-fill"></i> Kelola User
+        </h1>
+        <p class="mb-0 opacity-75 small">Kelola data pengguna aplikasi</p>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-sm-0">
+        <button class="btn-refresh-header" onclick="refreshUsers()">
+            <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+        <button class="btn-back-custom" onclick="window.location.href='index.html'">
+            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+        </button>
+    </div>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Card Form Tambah/Edit User -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h2><i class="bi bi-person-plus-fill"></i> Tambah / Edit User</h2>
+        </div>
+        <div class="card-body-custom">
+            <form id="userForm" enctype="multipart/form-data">
+                <input type="hidden" id="userId">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-upc-scan"></i> UID (unique)</label>
+                        <input type="text" name="uid" placeholder="UID otomatis atau manual" class="form-control-custom" readonly>
+                        <div class="form-text text-muted small">UID dari sistem, tidak perlu diubah</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-person-fill"></i> Nama Lengkap <span class="text-danger">*</span></label>
+                        <input type="text" name="name" placeholder="Nama Lengkap" class="form-control-custom" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-envelope-fill"></i> Email <span class="text-danger">*</span></label>
+                        <input type="email" name="email" placeholder="Email" class="form-control-custom" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-key-fill"></i> Password <span class="text-danger" id="passwordRequired">*</span></label>
+                        <input type="password" name="password" placeholder="Minimal 6 karakter" class="form-control-custom" id="userPassword">
+                        <div class="form-text text-muted small" id="passwordHelp">Diisi saat tambah user baru</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-telephone-fill"></i> No. Telepon</label>
+                        <input type="text" name="phone" placeholder="No. Telepon" class="form-control-custom">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom"><i class="bi bi-geo-alt-fill"></i> Alamat</label>
+                        <textarea name="address" placeholder="Alamat lengkap" class="form-control-custom" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-calendar-fill"></i> Bergabung Sejak</label>
+                        <input type="text" name="join_date" placeholder="Otomatis dari sistem" class="form-control-custom" readonly>
+                        <div class="form-text text-success small">Diisi otomatis oleh sistem</div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-image-fill"></i> Foto Profil</label>
+                        <input type="file" name="photo" accept="image/*" class="form-control-custom" id="userPhoto">
+                        <div class="form-text text-muted small">Kosongkan jika tidak ingin mengubah foto</div>
+                    </div>
+                    <div class="col-12 mt-3 d-flex gap-2 flex-wrap">
+                        <button type="submit" class="btn btn-primary-custom" id="submitBtn">
+                            <i class="bi bi-save-fill me-1"></i> Simpan User
+                        </button>
+                        <button type="button" class="btn btn-outline-custom" id="resetBtn">
+                            <i class="bi bi-arrow-repeat me-1"></i> Reset
+                        </button>
+                        <button type="button" class="btn btn-outline-danger-custom" id="cancelEditBtn" style="display: none;">
+                            <i class="bi bi-x-circle me-1"></i> Batal Edit
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Card Daftar User -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h2><i class="bi bi-database-fill"></i> Daftar User</h2>
+            <span class="badge-count" id="userCount">0</span>
+        </div>
+        <div class="card-body-custom p-0">
+            <div class="table-responsive-custom">
+                <table class="table table-hover align-middle table-custom mb-0" style="min-width: 900px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>UID</th>
+                            <th>Foto</th>
+                            <th>Nama</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Alamat</th>
+                            <th>Bergabung</th>
+                            <th>Aksi</th>
+                        <tr>
+                    </thead>
+                    <tbody id="userTable">
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <div class="spinner-border text-secondary" role="status"></div>
+                                <p class="mt-2 small text-muted">Memuat data user...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const API_BASE_URL = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    const BASE_URL = `${API_BASE_URL}/api/users`;
+    
+    let isEditing = false;
+    let currentEditId = null;
+
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast-notification toast-${type}`;
+        toast.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : type === 'error' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill'} me-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        toastContainer.appendChild(toast);
+        setTimeout(() => { toast.remove(); }, 3000);
+    }
+
+    function showLoading(show) {
+        document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+    }
+
+    function formatDate(dateValue) {
+        if (!dateValue) return '-';
+        try {
+            const date = new Date(dateValue);
+            if (isNaN(date.getTime())) return dateValue;
+            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+        } catch (e) {
+            return dateValue;
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function (m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function loadUsers() {
+        const tbody = document.getElementById('userTable');
+        const userCountSpan = document.getElementById('userCount');
+        
+        showLoading(true);
+        try {
+            const res = await fetch(BASE_URL);
+            if (!res.ok) throw new Error('Gagal mengambil data');
+            const users = await res.json();
+
+            if (!users.length) {
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center text-muted py-4">Belum ada user terdaftar</td></tr>`;
+                userCountSpan.innerText = '0';
+                return;
+            }
+
+            let html = '';
+            users.forEach(u => {
+                const joinDateRaw = u.created_at || u.join_date;
+                const joinDateDisplay = formatDate(joinDateRaw);
+                const safeName = escapeHtml(u.name);
+                const safeEmail = escapeHtml(u.email);
+                const safePhone = u.phone ? escapeHtml(u.phone) : '-';
+                const safeAddress = u.address ? escapeHtml(u.address) : '-';
+                const photoUrl = u.photo || 'https://randomuser.me/api/portraits/women/68.jpg';
+
+                html += `
+                    <tr>
+                        <td>${u.id}</td>
+                        <td><code class="small">${escapeHtml(u.uid) || '-'}</code></td>
+                        <td><img src="${photoUrl}" class="user-photo" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'"></td>
+                        <td class="fw-medium">${safeName}</td>
+                        <td>${safeEmail}</td>
+                        <td>${safePhone}</td>
+                        <td>${safeAddress}</td>
+                        <td>${joinDateDisplay}</td>
+                        <td>
+                            <button class="btn-edit" onclick='editUser(${JSON.stringify(u).replace(/'/g, "&#39;")})'><i class="bi bi-pencil-square"></i> Edit</button>
+                            <button class="btn-delete" onclick='deleteUser(${JSON.stringify(u).replace(/'/g, "&#39;")})'><i class="bi bi-trash3"></i> Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+            userCountSpan.innerText = users.length;
+            showToast('Data berhasil dimuat', 'success');
+        } catch (error) {
+            console.error(error);
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger py-4">Gagal memuat data: ${error.message}</td></tr>`;
+            userCountSpan.innerText = '0';
+            showToast(error.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function refreshUsers() {
+        loadUsers();
+    }
+
+    function editUser(user) {
+        isEditing = true;
+        currentEditId = user.id;
+        
+        document.getElementById('userId').value = user.id;
+        document.querySelector('[name="uid"]').value = user.uid || '';
+        document.querySelector('[name="name"]').value = user.name;
+        document.querySelector('[name="email"]').value = user.email;
+        document.querySelector('[name="phone"]').value = user.phone || '';
+        document.querySelector('[name="address"]').value = user.address || '';
+        
+        const joinDateRaw = user.created_at || user.join_date;
+        const joinDateDisplay = joinDateRaw ? formatDate(joinDateRaw) : '';
+        document.querySelector('[name="join_date"]').value = joinDateDisplay;
+        
+        document.getElementById('userPhoto').value = '';
+        document.getElementById('userPassword').value = '';
+        
+        document.getElementById('passwordRequired').style.display = 'none';
+        document.getElementById('passwordHelp').innerHTML = 'Kosongkan jika tidak ingin mengubah password';
+        document.getElementById('submitBtn').innerHTML = '<i class="bi bi-pencil-square me-1"></i> Update User';
+        document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        
+        document.querySelector('.card-custom').scrollIntoView({ behavior: 'smooth' });
+        showToast('Mode Edit: Silakan ubah data user', 'info');
+    }
+
+    function cancelEdit() {
+        isEditing = false;
+        currentEditId = null;
+        document.getElementById('userForm').reset();
+        document.getElementById('userId').value = '';
+        document.getElementById('passwordRequired').style.display = 'inline';
+        document.getElementById('passwordHelp').innerHTML = 'Diisi saat tambah user baru';
+        document.getElementById('submitBtn').innerHTML = '<i class="bi bi-save-fill me-1"></i> Simpan User';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        showToast('Mode edit dibatalkan', 'info');
+    }
+
+    async function deleteUser(user) {
+        if (!confirm(`Yakin ingin menghapus user "${user.name}"? Tindakan ini permanen dan akan menghapus dari MySQL & Firebase.`)) return;
+        
+        showLoading(true);
+        try {
+            const identifier = user.id || user.uid;
+            const res = await fetch(`${BASE_URL}/${identifier}`, { method: 'DELETE' });
+            const result = await res.json();
+            
+            if (!res.ok) throw new Error(result.message || 'Gagal menghapus');
+            
+            showToast(`User "${user.name}" berhasil dihapus dari MySQL & Firebase!`, 'success');
+            await loadUsers();
+            
+            if (currentEditId == user.id || currentEditId == user.uid) {
+                cancelEdit();
+            }
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    document.getElementById('userForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const id = document.getElementById('userId').value;
+        const formData = new FormData();
+        
+        const name = document.querySelector('[name="name"]').value;
+        const uid = document.querySelector('[name="uid"]').value;
+        const email = document.querySelector('[name="email"]').value;
+        const phone = document.querySelector('[name="phone"]').value;
+        const address = document.querySelector('[name="address"]').value;
+        const password = document.getElementById('userPassword').value;
+        
+        if (!name || !email) {
+            showToast('Nama dan Email wajib diisi!', 'error');
+            return;
+        }
+        
+        formData.append('name', name);
+        formData.append('uid', uid);
+        formData.append('email', email);
+        formData.append('phone', phone || '');
+        formData.append('address', address || '');
+        
+        if (password) {
+            if (password.length < 6) {
+                showToast('Password minimal 6 karakter!', 'error');
+                return;
+            }
+            formData.append('password', password);
+        }
+        
+        const file = document.getElementById('userPhoto').files[0];
+        if (file) formData.append('photo', file);
+        
+        let url = BASE_URL;
+        let method = 'POST';
+        let successMessage = 'User berhasil ditambahkan!';
+        
+        if (id) {
+            url += '/' + id;
+            method = 'PUT';
+            successMessage = 'User berhasil diupdate!';
+        } else if (!password) {
+            showToast('Password wajib diisi untuk user baru!', 'error');
+            return;
+        }
+        
+        showLoading(true);
+        try {
+            const res = await fetch(url, { method, body: formData });
+            const result = await res.json();
+            
+            if (!res.ok) throw new Error(result.message || result.error || 'Gagal menyimpan user');
+            
+            showToast(successMessage, 'success');
+            cancelEdit();
+            await loadUsers();
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+        cancelEdit();
+    });
+    
+    document.getElementById('cancelEditBtn').addEventListener('click', () => {
+        cancelEdit();
+    });
+
+    loadUsers();
+</script>
+</body>
+</html>

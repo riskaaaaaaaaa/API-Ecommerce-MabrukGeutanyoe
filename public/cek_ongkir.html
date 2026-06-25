@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Ongkir - RajaOngkir API</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .form-content { padding: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #333; }
+        select, input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        select:disabled { background-color: #f5f5f5; cursor: not-allowed; }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .loading { text-align: center; padding: 20px; display: none; }
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .error { background: #fee; color: #c33; padding: 12px; border-radius: 10px; margin-top: 15px; display: none; border-left: 4px solid #c33; }
+        .result { margin-top: 25px; display: none; }
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid #e0e0e0;
+        }
+        .service-name { font-size: 18px; font-weight: bold; color: #667eea; }
+        .service-cost { font-size: 24px; font-weight: bold; color: #28a745; margin: 10px 0; }
+        .service-etd {
+            font-size: 13px;
+            color: #888;
+            background: #e9ecef;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        .info-note {
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #0066cc;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚚 Cek Ongkir Instan</h1>
+            <p>Integrasi API RajaOngkir</p>
+        </div>
+        
+        <div class="form-content">
+            <div class="form-group">
+                <label>📍 Provinsi Asal</label>
+                <select id="originProvince">
+                    <option value="">-- Pilih Provinsi Asal --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>📍 Kota Asal</label>
+                <select id="origin" disabled>
+                    <option value="">-- Pilih Provinsi Dulu --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>📍 Provinsi Tujuan</label>
+                <select id="destinationProvince">
+                    <option value="">-- Pilih Provinsi Tujuan --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>🎯 Kota Tujuan</label>
+                <select id="destination" disabled>
+                    <option value="">-- Pilih Provinsi Dulu --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>⚖️ Berat (gram)</label>
+                <input type="number" id="weight" placeholder="Contoh: 1000" value="1000">
+            </div>
+            
+            <div class="form-group">
+                <label>🚛 Kurir</label>
+                <select id="courier">
+                    <option value="jne">JNE</option>
+                    <option value="pos">POS Indonesia</option>
+                    <option value="tiki">TIKI</option>
+                </select>
+            </div>
+            
+            <button onclick="cekOngkir()">🔍 Cek Ongkir</button>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Sedang mengecek ongkir...</p>
+            </div>
+            
+            <div class="error" id="error"></div>
+            <div class="result" id="result"></div>
+            
+            <div class="info-note">
+                💡 Pilih provinsi dulu, lalu kota akan otomatis muncul
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load provinsi
+        // Load provinsi - PASTIKAN ID TERSIMPAN DENGAN BENAR
+async function loadProvinces() {
+    try {
+        const response = await fetch('/api/ongkir/provinces');
+        const data = await response.json();
+        
+        console.log('Data provinsi dari API:', data); // DEBUG
+        
+        if (Array.isArray(data) && data.length > 0) {
+            const originSelect = document.getElementById('originProvince');
+            const destSelect = document.getElementById('destinationProvince');
+            
+            originSelect.innerHTML = '<option value="">-- Pilih Provinsi Asal --</option>';
+            destSelect.innerHTML = '<option value="">-- Pilih Provinsi Tujuan --</option>';
+            
+            data.forEach(province => {
+                // PASTIKAN ID TERBACA
+                const provinceId = province.province_id || province.id;
+                const provinceName = province.province || province.name;
+                
+                console.log(`Menambahkan provinsi: ID=${provinceId}, Nama=${provinceName}`); // DEBUG
+                
+                if (provinceId && provinceName) {
+                    const opt1 = document.createElement('option');
+                    opt1.value = provinceId;
+                    opt1.textContent = provinceName;
+                    originSelect.appendChild(opt1);
+                    
+                    const opt2 = document.createElement('option');
+                    opt2.value = provinceId;
+                    opt2.textContent = provinceName;
+                    destSelect.appendChild(opt2);
+                }
+            });
+        } else {
+            console.error('Data provinsi kosong atau tidak valid:', data);
+            showError('Tidak ada data provinsi');
+        }
+    } catch (error) {
+        console.error('Error loading provinces:', error);
+        showError('Gagal memuat provinsi: ' + error.message);
+    }
+}
+
+// 🔥 Load kota - DENGAN DEBUG LENGKAP
+async function loadCities(provinceId, targetSelectId) {
+    const selectEl = document.getElementById(targetSelectId);
+    
+    console.log(`=== loadCities dipanggil ===`);
+    console.log(`provinceId: ${provinceId} (type: ${typeof provinceId})`);
+    console.log(`targetSelectId: ${targetSelectId}`);
+    
+    if (!provinceId || provinceId === "") {
+        console.log('Province ID kosong, reset dropdown');
+        selectEl.innerHTML = '<option value="">-- Pilih Provinsi Dulu --</option>';
+        selectEl.disabled = true;
+        return;
+    }
+    
+    selectEl.innerHTML = '<option value="">-- Loading kota... --</option>';
+    selectEl.disabled = true;
+    
+    try {
+        // PASTIKAN URL BENAR
+        const url = `/api/ongkir/cities/${provinceId}`;
+        console.log(`Memanggil URL: ${url}`);
+        
+        const response = await fetch(url);
+        console.log(`Response status: ${response.status}`);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (data.error) {
+            console.error('Error dari server:', data.error);
+            selectEl.innerHTML = `<option value="">Error: ${data.error}</option>`;
+            selectEl.disabled = true;
+            return;
+        }
+        
+        if (Array.isArray(data) && data.length > 0) {
+            selectEl.innerHTML = '<option value="">-- Pilih Kota --</option>';
+            data.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.city_id;
+                option.textContent = city.city_name;
+                selectEl.appendChild(option);
+            });
+            selectEl.disabled = false;
+            console.log(`✅ Berhasil memuat ${data.length} kota`);
+        } else {
+            console.warn('Data kota kosong atau bukan array');
+            selectEl.innerHTML = '<option value="">Tidak ada kota untuk provinsi ini</option>';
+            selectEl.disabled = true;
+        }
+    } catch (error) {
+        console.error('❌ Error detail:', error);
+        selectEl.innerHTML = '<option value="">Error: Gagal memuat kota</option>';
+        selectEl.disabled = true;
+        showError(`Gagal memuat kota: ${error.message}`);
+    }
+}
+
+// Event listener dengan DEBUG
+document.getElementById('originProvince').addEventListener('change', (e) => {
+    const selectedValue = e.target.value;
+    console.log(`=== Provinsi Asal berubah ===`);
+    console.log(`Selected value: ${selectedValue}`);
+    console.log(`Selected option text: ${e.target.options[e.target.selectedIndex]?.text}`);
+    loadCities(selectedValue, 'origin');
+});
+
+document.getElementById('destinationProvince').addEventListener('change', (e) => {
+    const selectedValue = e.target.value;
+    console.log(`=== Provinsi Tujuan berubah ===`);
+    console.log(`Selected value: ${selectedValue}`);
+    loadCities(selectedValue, 'destination');
+});
+        
+        async function cekOngkir() {
+            const origin = document.getElementById('origin').value;
+            const destination = document.getElementById('destination').value;
+            const weight = document.getElementById('weight').value;
+            const courier = document.getElementById('courier').value;
+            
+            if (!origin || !destination) {
+                showError('Pilih kota asal dan tujuan!');
+                return;
+            }
+            
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('result').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/ongkir/cost', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ origin, destination, weight: parseInt(weight), courier })
+                });
+                
+                const data = await response.json();
+                
+                if (data && !data.error) {
+                    displayResult(data);
+                } else {
+                    showError(data.error || 'Gagal cek ongkir');
+                }
+            } catch (error) {
+                showError('Terjadi kesalahan');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        function displayResult(data) {
+    const resultDiv = document.getElementById('result');
+    const weight = document.getElementById('weight').value;
+    
+    console.log('Data hasil cek ongkir:', data); // DEBUG
+    
+    let html = `<h3>📦 Hasil Cek Ongkir</h3>
+        <div style="background:#e9ecef;padding:12px;border-radius:10px;margin-bottom:15px;">
+            <div>⚖️ Berat: ${weight} gram (${(weight/1000).toFixed(2)} kg)</div>
+        </div>`;
+    
+    let costs = [];
+    
+    // Handle berbagai format response
+    if (data.costs && Array.isArray(data.costs)) {
+        costs = data.costs;
+    } else if (Array.isArray(data)) {
+        data.forEach(item => {
+            if (item.costs) costs.push(...item.costs);
+            else if (item.service) costs.push(item);
+        });
+    } else if (data.data && Array.isArray(data.data)) {
+        data.data.forEach(item => {
+            if (item.costs) costs.push(...item.costs);
+        });
+    }
+    
+    console.log('Costs yang akan ditampilkan:', costs);
+    
+    if (costs.length === 0) {
+        html += '<div style="text-align:center;padding:20px;color:#666;">Tidak ada layanan pengiriman untuk rute ini</div>';
+    } else {
+        costs.forEach(cost => {
+            const costValue = cost.cost?.value || cost.cost || 0;
+            const etd = cost.cost?.etd || cost.etd || '-';
+            const serviceName = cost.service || cost.name || 'Layanan';
+            const description = cost.description || '';
+            
+            html += `<div class="result-item">
+                <div class="service-name">${serviceName}</div>
+                ${description ? `<div style="font-size:12px;color:#666;margin-bottom:8px;">${description}</div>` : ''}
+                <div class="service-cost">Rp ${costValue.toLocaleString('id-ID')}</div>
+                <div class="service-etd">⏱️ Estimasi: ${etd} hari</div>
+            </div>`;
+        });
+    }
+    
+    resultDiv.innerHTML = html;
+    resultDiv.style.display = 'block';
+}
+        function showError(msg) {
+            const errDiv = document.getElementById('error');
+            errDiv.textContent = msg;
+            errDiv.style.display = 'block';
+            setTimeout(() => errDiv.style.display = 'none', 4000);
+        }
+        
+        loadProvinces();
+    </script>
+</body>
+</html>

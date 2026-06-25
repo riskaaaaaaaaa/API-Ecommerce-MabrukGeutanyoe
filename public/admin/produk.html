@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Produk - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 100px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 110px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        .card-custom .card-header-custom {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .card-custom .card-header-custom h2 {
+            color: #2C3E3B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-custom .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.5rem 1.2rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Info badge di fixed header */
+        .info-badge {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Form styling - SAMA dengan halaman lain */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid #dee2e6;
+            color: #5a6e6a;
+            border-radius: 2rem;
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        .btn-edit-custom {
+            background: #3A7B70;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-edit-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-delete-custom {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-delete-custom:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Table styling - SAMA dengan halaman lain */
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+            padding: 0.75rem 1rem;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .product-img {
+            width: 55px;
+            height: 55px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            border: 1px solid #eef2f8;
+            background: #f8fafc;
+        }
+        
+        /* Badge count */
+        .badge-count {
+            background: #3A7B70;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Link ke detail produk */
+        .link-detail {
+            color: #3A7B70;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px dashed #3A7B70;
+        }
+        .link-detail:hover {
+            color: #2c5e55;
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 80px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.75rem 1rem;
+            }
+            .table-custom th, .table-custom td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            .product-img {
+                width: 40px;
+                height: 40px;
+            }
+            .btn-edit-custom, .btn-delete-custom {
+                padding: 0.25rem 0.6rem;
+                font-size: 0.65rem;
+            }
+            .info-badge {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.7rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 100px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 110px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .table-custom th:nth-child(6),
+            .table-custom td:nth-child(6),
+            .table-custom th:nth-child(7),
+            .table-custom td:nth-child(7) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-box-seam-fill"></i> Kelola Produk
+        </h1>
+        <p class="mb-0 opacity-75 small">Kelola data dasar produk toko</p>
+    </div>
+    <div class="d-flex gap-2 mt-2 mt-sm-0">
+        <div class="info-badge">
+            <i class="bi bi-info-circle-fill"></i> Data Dasar Produk
+        </div>
+        <button class="btn-back-custom" onclick="window.location.href='../index.html'">
+            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+        </button>
+    </div>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Form Tambah/Edit Produk -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h2><i class="bi bi-plus-circle-fill"></i> Tambah / Edit Produk</h2>
+        </div>
+        <div class="card-body-custom">
+            <form id="productForm">
+                <input type="hidden" id="productId">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-tag-fill"></i> Nama Produk <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control-custom" required placeholder="Contoh: Hijab Pashmina Silk">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-currency-dollar"></i> Harga (Rp) <span class="text-danger">*</span></label>
+                        <input type="number" name="price" class="form-control-custom" required placeholder="Harga jual">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-tag"></i> Harga Lama (Rp)</label>
+                        <input type="number" name="old_price" class="form-control-custom" placeholder="Harga coret (opsional)">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-star-fill"></i> Rating (1-5)</label>
+                        <input type="number" step="0.1" name="rating" class="form-control-custom" placeholder="0.0 - 5.0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-graph-up"></i> Terjual</label>
+                        <input type="number" name="sold" class="form-control-custom" placeholder="Jumlah terjual">
+                    </div>
+                    <div class="col-12 mt-3 d-flex flex-wrap align-items-center gap-2">
+                        <button type="submit" class="btn btn-primary-custom">
+                            <i class="bi bi-save-fill me-1"></i> Simpan Produk
+                        </button>
+                        <button type="reset" class="btn btn-outline-custom" id="resetFormBtn">
+                            <i class="bi bi-arrow-repeat"></i> Reset
+                        </button>
+                        <div class="ms-auto text-muted small">
+                            <i class="bi bi-image"></i> Untuk menambah gambar produk, 
+                            <a href="detail_produk.html" class="link-detail">kelola detail produk</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Daftar Produk -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h2><i class="bi bi-table"></i> Daftar Produk</h2>
+            <span class="badge-count" id="productCount">0</span>
+        </div>
+        <div class="card-body-custom p-0">
+            <div class="table-responsive-custom">
+                <table class="table table-hover align-middle table-custom mb-0" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Gambar</th>
+                            <th>Nama</th>
+                            <th>Harga</th>
+                            <th>Harga Lama</th>
+                            <th>Rating</th>
+                            <th>Terjual</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTable">
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="spinner-border text-secondary spinner-border-sm-custom" role="status"></div>
+                                <p class="mt-2 small text-muted">Memuat data produk...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const BASE_API = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+
+    async function loadProducts() {
+        const tbody = document.getElementById('productTable');
+        const countSpan = document.getElementById('productCount');
+        try {
+            const res = await fetch(`${BASE_API}/api/products`);
+            if (!res.ok) throw new Error('Gagal memuat produk');
+            const products = await res.json();
+            countSpan.innerText = products.length;
+
+            if (products.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-5">📭 Belum ada produk, silakan tambah produk terlebih dahulu</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            products.forEach((p, index) => {
+                let productImage = p.image && p.image !== '' ? p.image : 'https://placehold.co/400x400?text=No+Image';
+                html += `
+                <tr>
+                    <td class="fw-medium">${index + 1}</td>
+                    <td><img src="${productImage}" class="product-img" alt="product" onerror="this.src='https://placehold.co/400x400?text=No+Image'"></td>
+                    <td class="fw-semibold text-start">${escapeHtml(p.name)}</td>
+                    <td class="fw-medium">Rp ${Number(p.price).toLocaleString('id-ID')}</td>
+                    <td>${p.old_price ? 'Rp ' + Number(p.old_price).toLocaleString('id-ID') : '-'}</td>
+                    <td>⭐ ${p.rating || 0}</td>
+                    <td>${p.sold || 0}</td>
+                    <td class="text-nowrap">
+                        <button class="btn-edit-custom" onclick='editProduct(${JSON.stringify(p).replace(/'/g, "&#39;")})'>
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </button>
+                        <button class="btn-delete-custom ms-1" onclick="deleteProduct(${p.id})">
+                            <i class="bi bi-trash3"></i> Hapus
+                        </button>
+                    </td>
+                </tr>
+                `;
+            });
+            tbody.innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">❌ Gagal memuat data: ${err.message}</td></tr>`;
+            countSpan.innerText = '0';
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function (m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    window.editProduct = function (product) {
+        document.getElementById('productId').value = product.id;
+        document.querySelector('[name="name"]').value = product.name;
+        document.querySelector('[name="price"]').value = product.price;
+        document.querySelector('[name="old_price"]').value = product.old_price || '';
+        document.querySelector('[name="rating"]').value = product.rating || '';
+        document.querySelector('[name="sold"]').value = product.sold || '';
+        document.querySelector('.card-custom').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    window.deleteProduct = async function (id) {
+        if (!confirm('Yakin ingin menghapus produk ini? Semua data termasuk gambar detail akan terhapus secara permanen.')) return;
+        try {
+            const res = await fetch(`${BASE_API}/api/products/${id}`, { method: 'DELETE' });
+            if (!res.ok) throw new Error('Gagal menghapus');
+            await loadProducts();
+            const currentId = document.getElementById('productId').value;
+            if (currentId == id) {
+                document.getElementById('productForm').reset();
+                document.getElementById('productId').value = '';
+            }
+            alert('✅ Produk berhasil dihapus');
+        } catch (err) {
+            alert('❌ Error: ' + err.message);
+        }
+    };
+
+    document.getElementById('productForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const id = document.getElementById('productId').value;
+        const formData = new FormData(this);
+        const payload = Object.fromEntries(formData.entries());
+        
+        if (payload.price) payload.price = Number(payload.price);
+        if (payload.old_price) payload.old_price = Number(payload.old_price);
+        if (payload.rating) payload.rating = parseFloat(payload.rating);
+        if (payload.sold) payload.sold = Number(payload.sold);
+        
+        let url, method;
+        if (id) {
+            url = `${BASE_API}/api/products/${id}`;
+            method = 'PUT';
+        } else {
+            url = `${BASE_API}/api/products`;
+            method = 'POST';
+        }
+
+        try {
+            const res = await fetch(url, { 
+                method, 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Gagal menyimpan produk');
+            
+            this.reset();
+            document.getElementById('productId').value = '';
+            await loadProducts();
+            alert(id ? '✏️ Produk berhasil diupdate' : '🎉 Produk berhasil ditambahkan');
+        } catch (err) {
+            alert('⚠️ Error: ' + err.message);
+        }
+    });
+
+    document.getElementById('resetFormBtn').addEventListener('click', function () {
+        document.getElementById('productForm').reset();
+        document.getElementById('productId').value = '';
+    });
+
+    loadProducts();
+</script>
+</body>
+</html>

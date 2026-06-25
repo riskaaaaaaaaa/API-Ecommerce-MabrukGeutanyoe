@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Admin Dashboard - Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .dashboard-container {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            padding-top: 100px; /* Sesuaikan dengan tinggi header */
+        }
+        
+        /* Header FIXED - selalu di atas layar, tidak ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+                border-radius: 0;
+            }
+        }
+        
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+        }
+        
+        .admin-name {
+            font-weight: 500;
+            color: white;
+        }
+        
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 2rem;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-1px);
+        }
+        
+        /* Menu Card styling */
+        .menu-card {
+            background: white;
+            border-radius: 1.25rem;
+            border: 1px solid #eef2f8;
+            transition: all 0.2s;
+            cursor: pointer;
+            overflow: hidden;
+            height: 100%;
+        }
+        
+        .menu-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            border-color: #d0e2dd;
+        }
+        
+        .card-icon {
+            background: #E8F5F2;
+            padding: 1.5rem 0 1rem 0;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+        
+        .card-content {
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .card-content h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #2C3E3B;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-content p {
+            color: #6B7C7A;
+            font-size: 0.75rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        
+        .btn-menu {
+            background: #3A7B70;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-menu:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        
+        /* Footer */
+        .dashboard-footer {
+            background: #F8FAFC;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            border-top: 1px solid #eef2f8;
+            font-size: 0.7rem;
+            color: #9bb5b0;
+        }
+        
+        /* Content wrapper */
+        .content-wrapper {
+            padding: 1.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .gradient-header {
+                padding: 0.75rem 1rem;
+            }
+            .dashboard-container {
+                padding-top: 80px;
+            }
+            .admin-info {
+                padding: 0.3rem 0.8rem;
+            }
+            .admin-name {
+                font-size: 0.8rem;
+            }
+            .logout-btn {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.7rem;
+            }
+            .card-icon {
+                font-size: 2rem;
+                padding: 1rem 0 0.5rem 0;
+            }
+            .card-content h3 {
+                font-size: 1rem;
+            }
+            .content-wrapper {
+                padding: 1rem;
+            }
+        }
+        
+        @media (min-width: 1200px) {
+            .dashboard-container {
+                max-width: 1600px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 fw-bold mb-1 d-flex align-items-center gap-2">
+            🕌 Mabruk Geutanyoe Store Admin
+        </h1>
+        <p class="mb-0 opacity-75 small">Kelola toko, pelanggan, dan produk dalam satu panel</p>
+    </div>
+    <div class="admin-info">
+        <span class="admin-name" id="adminName">Admin</span>
+        <button class="logout-btn" id="logoutButton">
+            <i class="bi bi-box-arrow-right me-1"></i> Keluar
+        </button>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <!-- Menu Grid - Bootstrap Grid System -->
+    <div class="content-wrapper">
+        <div class="row g-4">
+            <!-- Menu 1: Kelola Akun User -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="admin.html">
+                    <div class="card-icon">👥</div>
+                    <div class="card-content">
+                        <h3>Kelola Akun User</h3>
+                        <p>Tambah, edit, hapus akun pelanggan</p>
+                        <button class="btn-menu">👥 Kelola Akun →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 2: Chat Pelanggan -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="admin-chat.html">
+                    <div class="card-icon">💬</div>
+                    <div class="card-content">
+                        <h3>Chat Pelanggan</h3>
+                        <p>Balas pesan, pantau percakapan</p>
+                        <button class="btn-menu">💬 Buka Chat →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 3: Kelola Produk -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="/admin/produk.html">
+                    <div class="card-icon">📦</div>
+                    <div class="card-content">
+                        <h3>Kelola Produk</h3>
+                        <p>Tambah, edit, hapus produk hijab</p>
+                        <button class="btn-menu">📦 Kelola Produk →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 4: Kelola Detail Produk -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="/admin/detail_produk.html">
+                    <div class="card-icon">🔧</div>
+                    <div class="card-content">
+                        <h3>Kelola Detail Produk</h3>
+                        <p>Atur spesifikasi, varian, stok</p>
+                        <button class="btn-menu">🔧 Kelola Detail →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 5: Kelola Pembeli -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="users.html">
+                    <div class="card-icon">👨‍👩‍👧‍👦</div>
+                    <div class="card-content">
+                        <h3>Kelola Pembeli</h3>
+                        <p>Tambah, edit, hapus data pembeli</p>
+                        <button class="btn-menu">👨‍👩‍👧‍👦 Kelola Pembeli →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 6: Kelola Alamat Pembeli -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="admin_kelola_alamat_user.html">
+                    <div class="card-icon">📍</div>
+                    <div class="card-content">
+                        <h3>Kelola Alamat Pembeli</h3>
+                        <p>Tambah, edit, hapus alamat</p>
+                        <button class="btn-menu">📍 Kelola Alamat →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 7: Kelola Banner -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="/admin/banner.html">
+                    <div class="card-icon">🎨</div>
+                    <div class="card-content">
+                        <h3>Kelola Banner</h3>
+                        <p>Tambah, edit, hapus banner promosi</p>
+                        <button class="btn-menu">🎨 Kelola Banner →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 8: Kelola Orderan -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="kelola_order.html">
+                    <div class="card-icon">📋</div>
+                    <div class="card-content">
+                        <h3>Kelola Orderan</h3>
+                        <p>Tambah, edit, hapus orderan</p>
+                        <button class="btn-menu">📋 Kelola Orderan →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 9: Kelola Flash Sale -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="/admin/flashsale.html">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-content">
+                        <h3>Kelola Flash Sale</h3>
+                        <p>Atur penawaran waktu terbatas</p>
+                        <button class="btn-menu">⚡ Kelola Flash Sale →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 10: Kelola Cart -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="cart.html">
+                    <div class="card-icon">🛒</div>
+                    <div class="card-content">
+                        <h3>Kelola Cart</h3>
+                        <p>Atur item keranjang pelanggan</p>
+                        <button class="btn-menu">🛒 Kelola Cart →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 11: Kelola Favorites -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="favorites.html">
+                    <div class="card-icon">❤️</div>
+                    <div class="card-content">
+                        <h3>Kelola Favorites</h3>
+                        <p>Atur daftar favorit pelanggan</p>
+                        <button class="btn-menu">❤️ Kelola Favorites →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 12: Kelola Alamat Toko -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="admin_store_address.html">
+                    <div class="card-icon">🏪</div>
+                    <div class="card-content">
+                        <h3>Kelola Alamat Toko</h3>
+                        <p>Atur alamat asal pengiriman</p>
+                        <button class="btn-menu">🏪 Kelola Alamat Toko →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 13: Kelola Ulasan -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="kelola_ulasan.html">
+                    <div class="card-icon">⭐</div>
+                    <div class="card-content">
+                        <h3>Kelola Ulasan</h3>
+                        <p>Atur ulasan produk pelanggan</p>
+                        <button class="btn-menu">⭐ Kelola Ulasan →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu 14: Kelola Notifikasi -->
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="menu-card" data-href="notifications.html">
+                    <div class="card-icon">🔔</div>
+                    <div class="card-content">
+                        <h3>Kelola Notifikasi</h3>
+                        <p>Kirim notifikasi ke pelanggan</p>
+                        <button class="btn-menu">🔔 Kelola Notifikasi →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-footer">
+        <i class="bi bi-c-circle"></i> 2026 Mabruk Geutanyoe Hijab Store — Panel Admin Terintegrasi
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const adminNameSpan = document.getElementById('adminName');
+    const storedAdmin = localStorage.getItem('adminEmail') || sessionStorage.getItem('adminEmail');
+    
+    if (storedAdmin) {
+        const namePart = storedAdmin.split('@')[0];
+        adminNameSpan.innerText = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+    } else {
+        adminNameSpan.innerText = 'Administrator';
+    }
+
+    const logoutBtn = document.getElementById('logoutButton');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try {
+                const API_BASE = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+                const response = await fetch(`${API_BASE}/api/admin/logout`, {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (response.ok) {
+                    localStorage.removeItem('adminEmail');
+                    sessionStorage.removeItem('adminEmail');
+                    window.location.href = 'index_login.html';
+                } else {
+                    console.error('Logout gagal');
+                    window.location.href = 'index_login.html';
+                }
+            } catch (err) {
+                console.error(err);
+                window.location.href = 'index_login.html';
+            }
+        });
+    }
+
+    const cards = document.querySelectorAll('.menu-card');
+    cards.forEach(card => {
+        const href = card.getAttribute('data-href');
+        if (href) {
+            card.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') return;
+                window.location.href = href;
+            });
+            const btn = card.querySelector('.btn-menu');
+            if (btn) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    window.location.href = href;
+                });
+            }
+        }
+    });
+</script>
+</body>
+</html>

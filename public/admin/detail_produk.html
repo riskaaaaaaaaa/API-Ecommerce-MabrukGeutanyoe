@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Detail Produk - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 110px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 120px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        .card-custom .card-header-custom {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .card-custom .card-header-custom h2 {
+            color: #2C3E3B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-custom .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.5rem 1.2rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Info badge di fixed header */
+        .info-badge {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Form styling - SAMA dengan halaman lain */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        textarea.form-control-custom {
+            border-radius: 1.25rem;
+            resize: vertical;
+        }
+        input[readonly].form-control-custom {
+            background-color: #f8fafc;
+            cursor: not-allowed;
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-edit-custom {
+            background: #3A7B70;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-edit-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-delete-custom {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-delete-custom:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Size checkbox styling */
+        .size-box {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.25rem;
+        }
+        .size-box label {
+            background: #f8fafc;
+            padding: 0.4rem 1.2rem;
+            border-radius: 2rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            border: 1.5px solid #e2e8f0;
+        }
+        .size-box label:has(input:checked) {
+            background: #E8F5F2;
+            border-color: #3A7B70;
+            color: #3A7B70;
+        }
+        .size-box input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: #3A7B70;
+        }
+        
+        /* Spec preview */
+        .spec-preview {
+            background: #F8FAFC;
+            border-radius: 1rem;
+            padding: 1rem;
+            border: 1px solid #eef2f8;
+        }
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eef2f8;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+        }
+        .spec-item:last-child {
+            border-bottom: none;
+        }
+        .spec-title {
+            font-weight: 600;
+            color: #3A7B70;
+        }
+        
+        /* Preview images */
+        .preview-images {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+        .preview-images img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            border: 2px solid #eef2f8;
+            background: #f8fafc;
+        }
+        
+        /* Table styling - SAMA dengan halaman lain */
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+            padding: 0.75rem 1rem;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        /* Badge count */
+        .badge-count {
+            background: #3A7B70;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 85px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.75rem 1rem;
+            }
+            .table-custom th, .table-custom td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            .size-box label {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.7rem;
+            }
+            .preview-images img {
+                width: 55px;
+                height: 55px;
+            }
+            .spec-item {
+                flex-direction: column;
+                gap: 0.25rem;
+            }
+            .info-badge {
+                font-size: 0.7rem;
+                padding: 0.3rem 0.7rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 110px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 120px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-tags-fill"></i> Kelola Detail Produk
+        </h1>
+        <p class="mb-0 opacity-75 small">Kelola spesifikasi, ukuran, dan gambar produk</p>
+    </div>
+    <div class="mt-2 mt-sm-0">
+        <div class="info-badge">
+            <i class="bi bi-info-circle-fill"></i> Lengkapi spesifikasi & gambar
+        </div>
+        <button class="btn-back-custom mt-2" onclick="window.location.href='../index.html'">
+            <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+        </button>
+    </div>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Form Tambah/Edit Detail Produk -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h2><i class="bi bi-pencil-square"></i> Tambah / Edit Detail Produk</h2>
+        </div>
+        <div class="card-body-custom">
+            <form id="detailForm" enctype="multipart/form-data">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-upc-scan"></i> ID Produk <span class="text-danger">*</span></label>
+                        <input type="number" name="product_id" class="form-control-custom" required placeholder="Masukkan ID produk">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-box-seam"></i> Nama Produk</label>
+                        <input type="text" name="name" class="form-control-custom" readonly placeholder="(terisi otomatis)">
+                        <div class="form-text text-muted small"><i class="bi bi-info-circle"></i> Nama dari data utama</div>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-currency-dollar"></i> Harga (Rp)</label>
+                        <input type="number" name="price" class="form-control-custom" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-tag"></i> Harga Lama (Rp)</label>
+                        <input type="number" name="old_price" class="form-control-custom" readonly>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-weight"></i> Berat (gram)</label>
+                        <input type="number" name="weight" class="form-control-custom" step="1" placeholder="Contoh: 250">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-building"></i> Merek</label>
+                        <input type="text" name="brand" class="form-control-custom" placeholder="Contoh: Zoya, Elzatta">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-grid"></i> Kategori</label>
+                        <input type="text" name="category" class="form-control-custom" placeholder="Pashmina, SegiEmpat">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-pie-chart"></i> Stok</label>
+                        <input type="number" name="stock" class="form-control-custom" placeholder="Jumlah tersedia">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-droplet"></i> Bahan</label>
+                        <input type="text" name="material" class="form-control-custom" placeholder="Viscose, Ceruty">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom"><i class="bi bi-textarea-resize"></i> Deskripsi Produk</label>
+                        <textarea name="description" class="form-control-custom" rows="3" placeholder="Detail tentang produk..."></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom"><i class="bi bi-aspect-ratio"></i> Ukuran Produk</label>
+                        <div class="size-box">
+                            <label><input type="checkbox" name="sizes" value="S"> S</label>
+                            <label><input type="checkbox" name="sizes" value="M"> M</label>
+                            <label><input type="checkbox" name="sizes" value="L"> L</label>
+                            <label><input type="checkbox" name="sizes" value="XL"> XL</label>
+                            <label><input type="checkbox" name="sizes" value="XXL"> XXL</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom"><i class="bi bi-truck"></i> Info Pengiriman</label>
+                        <textarea name="shipping_info" class="form-control-custom" rows="2" placeholder="Estimasi pengiriman, kurir, biaya..."></textarea>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label-custom"><i class="bi bi-eye"></i> Preview Spesifikasi</label>
+                        <div class="spec-preview">
+                            <div class="spec-item"><span class="spec-title">Merek</span> <span id="previewBrand">-</span></div>
+                            <div class="spec-item"><span class="spec-title">Kategori</span> <span id="previewCategory">-</span></div>
+                            <div class="spec-item"><span class="spec-title">Bahan</span> <span id="previewMaterial">-</span></div>
+                            <div class="spec-item"><span class="spec-title">Berat</span> <span id="previewWeight">-</span></div>
+                            <div class="spec-item"><span class="spec-title">Stok</span> <span id="previewStock">-</span></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-image"></i> Gambar 1 (Utama)</label>
+                        <input type="file" name="image1" class="form-control-custom" accept="image/*">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-images"></i> Gambar 2</label>
+                        <input type="file" name="image2" class="form-control-custom" accept="image/*">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-images"></i> Gambar 3</label>
+                        <input type="file" name="image3" class="form-control-custom" accept="image/*">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-images"></i> Gambar 4</label>
+                        <input type="file" name="image4" class="form-control-custom" accept="image/*">
+                    </div>
+                    <div class="col-12">
+                        <div class="preview-images" id="previewImages"></div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <button type="submit" class="btn btn-primary-custom w-100">
+                            <i class="bi bi-save-fill me-2"></i> Simpan Detail Produk
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabel Daftar Detail Produk -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h2><i class="bi bi-table"></i> Daftar Detail Produk</h2>
+            <span class="badge-count" id="productCount">0</span>
+        </div>
+        <div class="card-body-custom p-0">
+            <div class="table-responsive-custom">
+                <table class="table table-hover align-middle table-custom mb-0" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Produk ID</th>
+                            <th>Nama</th>
+                            <th>Merek</th>
+                            <th>Kategori</th>
+                            <th>Berat</th>
+                            <th>Stok</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTable">
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="spinner-border text-secondary spinner-border-sm-custom" role="status"></div>
+                                <p class="mt-2 small text-muted">Memuat data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const API_BASE_URL = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    const API = `${API_BASE_URL}/api/product-details`;
+    let editId = null;
+
+    const detailForm = document.getElementById('detailForm');
+    const brandInput = document.querySelector('input[name="brand"]');
+    const categoryInput = document.querySelector('input[name="category"]');
+    const materialInput = document.querySelector('input[name="material"]');
+    const weightInput = document.querySelector('input[name="weight"]');
+    const stockInput = document.querySelector('input[name="stock"]');
+
+    function updatePreviewSpec() {
+        document.getElementById('previewBrand').innerText = brandInput.value.trim() || '-';
+        document.getElementById('previewCategory').innerText = categoryInput.value.trim() || '-';
+        document.getElementById('previewMaterial').innerText = materialInput.value.trim() || '-';
+        document.getElementById('previewWeight').innerText = weightInput.value.trim() ? weightInput.value.trim() + ' gram' : '-';
+        document.getElementById('previewStock').innerText = stockInput.value.trim() || '-';
+    }
+    brandInput.addEventListener('input', updatePreviewSpec);
+    categoryInput.addEventListener('input', updatePreviewSpec);
+    materialInput.addEventListener('input', updatePreviewSpec);
+    weightInput.addEventListener('input', updatePreviewSpec);
+    stockInput.addEventListener('input', updatePreviewSpec);
+
+    const imageInputs = document.querySelectorAll('input[name="image1"], input[name="image2"], input[name="image3"], input[name="image4"]');
+    const previewContainer = document.getElementById('previewImages');
+    function handleImagePreview() {
+        previewContainer.innerHTML = '';
+        imageInputs.forEach(input => {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+    }
+    imageInputs.forEach(inp => inp.addEventListener('change', handleImagePreview));
+
+    async function loadData() {
+        const tbody = document.getElementById('productTable');
+        const countSpan = document.getElementById('productCount');
+        try {
+            const res = await fetch(API);
+            if (!res.ok) throw new Error('Gagal mengambil data');
+            const data = await res.json();
+            countSpan.innerText = data.length;
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-5">📭 Belum ada detail produk</td></tr>`;
+                return;
+            }
+            let html = '';
+            data.forEach(d => {
+                html += `
+                <tr>
+                    <td class="fw-medium">${d.id || '-'}</td>
+                    <td>${d.product_id}</td>
+                    <td class="fw-semibold">${escapeHtml(d.name || '-')}</td>
+                    <td>${escapeHtml(d.brand || '-')}</td>
+                    <td>${escapeHtml(d.category || '-')}</td>
+                    <td>${d.weight ? d.weight + ' gr' : '-'}</td>
+                    <td>${d.stock ?? 0}</td>
+                    <td class="text-nowrap">
+                        <button class="btn-edit-custom" onclick="editData(${d.product_id})"><i class="bi bi-pencil-square"></i> Edit</button>
+                        <button class="btn-delete-custom ms-1" onclick="deleteData(${d.product_id})"><i class="bi bi-trash3"></i> Hapus</button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">❌ Gagal memuat data: ${err.message}</td></tr>`;
+            countSpan.innerText = '0';
+        }
+    }
+
+    detailForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const productId = document.querySelector('input[name="product_id"]').value;
+        if (!productId) {
+            alert('Product ID wajib diisi');
+            return;
+        }
+
+        try {
+            const formData = new FormData(this);
+            const sizes = [...document.querySelectorAll('input[name="sizes"]:checked')].map(cb => cb.value).join(',');
+            formData.set('sizes', sizes);
+            const specifications = [
+                { title: 'Merek', value: brandInput.value.trim() },
+                { title: 'Kategori', value: categoryInput.value.trim() },
+                { title: 'Bahan', value: materialInput.value.trim() },
+                { title: 'Berat', value: weightInput.value.trim() ? weightInput.value.trim() + ' gram' : '-' },
+                { title: 'Stok', value: stockInput.value.trim() }
+            ];
+            formData.set('specifications', JSON.stringify(specifications));
+            formData.delete('name');
+            formData.delete('price');
+            formData.delete('old_price');
+
+            let url = API;
+            let method = 'POST';
+            if (editId) {
+                url = `${API}/${editId}`;
+                method = 'PUT';
+            }
+
+            const res = await fetch(url, { method, body: formData });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Gagal menyimpan');
+            alert(result.message || 'Data berhasil disimpan');
+            
+            detailForm.reset();
+            document.getElementById('previewImages').innerHTML = '';
+            editId = null;
+            updatePreviewSpec();
+            document.querySelectorAll('input[name="sizes"]').forEach(cb => cb.checked = false);
+            await loadData();
+        } catch (err) {
+            console.error('Error:', err);
+            alert('Error: ' + err.message);
+        }
+    });
+
+    window.editData = async function (productId) {
+        try {
+            const res = await fetch(`${API}/${productId}`);
+            const result = await res.json();
+            if (!result.success) {
+                alert(result.message || 'Gagal ambil detail');
+                return;
+            }
+            const d = result.data;
+            const form = detailForm;
+            form.product_id.value = d.product_id || '';
+            form.name.value = d.name || '';
+            form.price.value = d.price || '';
+            form.old_price.value = d.old_price || '';
+            form.weight.value = d.weight || '';
+            form.brand.value = d.brand || '';
+            form.category.value = d.category || '';
+            form.stock.value = d.stock || '';
+            form.material.value = d.material || '';
+            form.description.value = d.description || '';
+            form.shipping_info.value = d.shipping_info || '';
+
+            const sizesArray = d.sizes || [];
+            document.querySelectorAll('input[name="sizes"]').forEach(cb => {
+                cb.checked = sizesArray.includes(cb.value);
+            });
+            document.getElementById('previewBrand').innerText = d.brand || '-';
+            document.getElementById('previewCategory').innerText = d.category || '-';
+            document.getElementById('previewMaterial').innerText = d.material || '-';
+            document.getElementById('previewWeight').innerText = d.weight ? d.weight + ' gram' : '-';
+            document.getElementById('previewStock').innerText = d.stock || '-';
+
+            let imageHtml = '';
+            if (d.images && d.images.length) {
+                d.images.forEach(img => {
+                    if (img) {
+                        imageHtml += `<img src="${API_BASE_URL}/uploads/product_details/${img}" onerror="this.src='https://placehold.co/400x400?text=No+Image'" style="width:70px;height:70px;object-fit:cover;border-radius:12px;">`;
+                    }
+                });
+            }
+            document.getElementById('previewImages').innerHTML = imageHtml;
+            editId = d.product_id;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+            console.error('Edit error:', err);
+            alert('Gagal ambil detail produk: ' + err.message);
+        }
+    };
+
+    window.deleteData = async function (productId) {
+        if (!confirm('Yakin ingin menghapus detail produk ini? Tindakan permanen.')) return;
+        try {
+            const res = await fetch(`${API}/${productId}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message);
+            alert(result.message || 'Produk berhasil dihapus');
+            if (editId === productId) {
+                detailForm.reset();
+                document.getElementById('previewImages').innerHTML = '';
+                editId = null;
+                updatePreviewSpec();
+                document.querySelectorAll('input[name="sizes"]').forEach(cb => cb.checked = false);
+            }
+            await loadData();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function (m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    loadData();
+</script>
+</body>
+</html>

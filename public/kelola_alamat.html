@@ -1,0 +1,460 @@
+<!-- <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Alamat & Cek Ongkir - Biteship</title>
+    <style>
+        .loader {
+    text-align: center;
+    padding: 20px;
+    color: #3a7b70;
+}
+        /* (CSS sama seperti sebelumnya, tidak berubah) */
+        * { box-sizing: border-box; font-family: system-ui; }
+        body { background: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        .card { background: white; border-radius: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 30px; }
+        h2 { margin-top: 0; color: #1e2a3e; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-weight: 600; font-size: 0.85rem; color: #2c3e50; }
+        input, select, textarea { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 12px; }
+        button { background-color: #3a7b70; color: white; border: none; padding: 10px 20px; border-radius: 40px; cursor: pointer; }
+        .btn-danger { background-color: #e74c3c; }
+        .btn-secondary { background-color: #95a5a6; }
+        .address-item { border: 1px solid #e2e8f0; border-radius: 20px; padding: 16px; margin-bottom: 16px; }
+        .address-item.default { background: #e6f7f3; border-left: 5px solid #3a7b70; }
+        .cost-result { background: #f8fafc; padding: 12px; border-radius: 16px; margin-top: 12px; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h2>👤 Pilih User ID</h2>
+        <div class="form-group" style="max-width: 300px;">
+            <input type="text" id="userIdInput" placeholder="user_123" value="user_alfi">
+            <button id="loadAddressBtn">📋 Muat Alamat</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📍 <span id="formTitle">Tambah Alamat Baru</span></h2>
+        <div class="form-grid">
+            <div class="form-group"><label>Label</label><input type="text" id="label" placeholder="Rumah/Kantor"></div>
+            <div class="form-group"><label>Nama Penerima *</label><input type="text" id="recipientName"></div>
+            <div class="form-group"><label>No. Telepon *</label><input type="text" id="phone"></div>
+            <div class="form-group"><label>Provinsi *</label><select id="provinceSelect"></select></div>
+            <div class="form-group"><label>Kota/Kabupaten *</label><select id="citySelect"></select></div>
+            <div class="form-group"><label>Kecamatan *</label><select id="districtSelect"></select></div>
+            <div class="form-group"><label>Kode Pos</label><input type="text" id="postalCode"></div>
+            <div class="form-group full-width"><label>Alamat Lengkap *</label><textarea id="address" rows="2"></textarea></div>
+            <div class="form-group"><label>Jadikan Utama?</label><select id="isDefault"><option value="0">Tidak</option><option value="1">Ya</option></select></div>
+            <div class="form-group"><label>Alamat Toko?</label><select id="isStore"><option value="0">Tidak</option><option value="1">Ya (jadikan asal pengiriman)</option></select></div>
+        </div>
+        <div style="display: flex; gap: 12px; margin-top: 20px;">
+            <button id="submitBtn">💾 Simpan Alamat</button>
+            <button id="cancelEditBtn" class="btn-secondary" style="display: none;">Batal</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📦 Daftar Alamat</h2>
+        <div id="addressListContainer"></div>
+    </div>
+
+    <div class="card">
+        <h2>🚚 Cek Ongkir (kirim dari toko ke alamat terpilih)</h2>
+        <div class="form-grid">
+            <div class="form-group"><label>Pilih Alamat Tujuan</label><select id="destinationAddressSelect"></select></div>
+            <div class="form-group"><label>Berat (gram)</label><input type="number" id="weight" value="1000"></div>
+            <div class="form-group"><label>Kurir</label><select id="courier">
+                <option value="jne">JNE</option>
+                <option value="tiki">TIKI</option>
+                <option value="pos">POS</option>
+                <option value="sicepat">SiCepat</option>
+            </select></div>
+        </div>
+        <input type="hidden" id="originAreaId" value="">
+        <button id="checkOngkirBtn">💰 Hitung Ongkir</button>
+        <div id="ongkirResult" class="cost-result" style="display: none;"><strong>Hasil:</strong><div id="costDetail"></div></div>
+    </div>
+</div>
+
+<script>
+    let currentUserId = '', addresses = [], editMode = false, editAddressId = null;
+
+    const apiFetch = async (url, options = {}) => {
+        const res = await fetch(url, options);
+        if (!res.ok) throw new Error((await res.json()).error || `HTTP ${res.status}`);
+        return res.json();
+    };
+
+    // Fungsi untuk mencari area_id dari Biteship berdasarkan nama kecamatan + kota
+    async function getAreaIdFromDistrict(districtName, cityName) {
+    // Terkadang nama kecamatan dengan 'Kab.' atau 'Kota.' tidak cocok. Kita kirim kombinasi yang lebih umum.
+    const query = `${districtName}, ${cityName}`;
+    console.log(`[Debug] Mencari area untuk: ${query}`); // Gunakan console log untuk debugging
+    
+    try {
+        const res = await fetch(`/api/biteship/areas?q=${encodeURIComponent(query)}`);
+        if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(`HTTP ${res.status}: ${errorText}`);
+        }
+        
+        const data = await res.json();
+        console.log('[Debug] Respons dari Biteship:', data); // Lihat respons mentah di console
+
+        if (data.data && data.data.length > 0) {
+            return data.data[0].id;
+        }
+        return null;
+    } catch (err) {
+        console.error('[Error] Gagal mencari area Biteship:', err);
+        return null;
+    }
+}
+
+    // Load Provinsi dari JSON statis
+    async function loadProvinces() {
+        try {
+            const response = await fetch('https://ihsaninh.github.io/wilayah-indonesia/provinces.json');
+            const provinces = await response.json();
+            const select = document.getElementById('provinceSelect');
+            select.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+            provinces.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = p.value;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            alert('Gagal memuat provinsi');
+        }
+    }
+
+    async function loadCities(provinceId) {
+        if (!provinceId) {
+            document.getElementById('citySelect').innerHTML = '<option value="">-- Pilih Kota --</option>';
+            return;
+        }
+        try {
+            const response = await fetch(`https://ihsaninh.github.io/wilayah-indonesia/${provinceId}/regencies.json`);
+            const citiesData = await response.json();
+            const citySelect = document.getElementById('citySelect');
+            citySelect.innerHTML = '<option value="">-- Pilih Kota --</option>';
+            citiesData.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.id;
+                option.textContent = `${city.type} ${city.value}`;
+                citySelect.appendChild(option);
+            });
+            document.getElementById('districtSelect').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+        } catch (error) {
+            alert('Gagal memuat kota');
+        }
+    }
+
+    async function loadDistricts(cityId) {
+        if (!cityId) return;
+        const provinceId = document.getElementById('provinceSelect').value;
+        if (!provinceId) return;
+        try {
+            const response = await fetch(`https://ihsaninh.github.io/wilayah-indonesia/${provinceId}/${cityId}/district.json`);
+            const districtsData = await response.json();
+            const districtSelect = document.getElementById('districtSelect');
+            districtSelect.innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+            districtsData.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district.id;
+                option.textContent = district.value;
+                districtSelect.appendChild(option);
+            });
+        } catch (error) {
+            alert('Gagal memuat kecamatan');
+        }
+    }
+
+    function bindFormEvents() {
+        const provinceSelect = document.getElementById('provinceSelect');
+        const citySelect = document.getElementById('citySelect');
+        provinceSelect.onchange = (e) => loadCities(e.target.value);
+        citySelect.onchange = (e) => loadDistricts(e.target.value);
+    }
+
+    // Simpan alamat (create/update)
+    async function saveAddress() {
+        const recipient_name = document.getElementById('recipientName').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const address = document.getElementById('address').value.trim();
+        const province_id = document.getElementById('provinceSelect').value;
+        const province_name = document.getElementById('provinceSelect').options[document.getElementById('provinceSelect').selectedIndex]?.text || '';
+        const city_id = document.getElementById('citySelect').value;
+        const city_name = document.getElementById('citySelect').options[document.getElementById('citySelect').selectedIndex]?.text.split(' (')[0] || '';
+        const district_id = document.getElementById('districtSelect').value;
+        const district_name = document.getElementById('districtSelect').options[document.getElementById('districtSelect').selectedIndex]?.text || '';
+        const postal_code = document.getElementById('postalCode').value.trim();
+        const label = document.getElementById('label').value.trim();
+        const is_default = document.getElementById('isDefault').value === '1';
+        const is_store = document.getElementById('isStore').value === '1';
+
+        if (!recipient_name || !phone || !address || !province_id || !city_id || !district_id) {
+            alert('Harap isi semua field bertanda *');
+            return;
+        }
+
+        // Dapatkan area_id dari Biteship
+        const biteship_area_id = await getAreaIdFromDistrict(district_name, city_name);
+        if (!biteship_area_id) {
+            alert('Tidak dapat mengenali area kecamatan. Coba pilih kecamatan lain atau periksa koneksi.');
+            return;
+        }
+
+        const payload = {
+            user_id: currentUserId,
+            label,
+            recipient_name,
+            phone,
+            address,
+            province_id,
+            province_name,
+            city_id,
+            city_name,
+            district_id,
+            district_name,
+            biteship_area_id,
+            postal_code,
+            is_default,
+            is_store
+        };
+
+        try {
+            if (editMode && editAddressId) {
+                await apiFetch(`/api/addresses/${editAddressId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                alert('Alamat berhasil diperbarui');
+            } else {
+                await apiFetch('/api/addresses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                alert('Alamat berhasil ditambahkan');
+            }
+            resetForm();
+            loadAddresses();
+            // Jika alamat toko diubah, refresh originAreaId
+            if (is_store) {
+                loadStoreAddress();
+            }
+        } catch (err) {
+            alert('Gagal menyimpan alamat: ' + err.message);
+        }
+    }
+
+    async function loadAddresses() {
+        if (!currentUserId) return;
+        const data = await apiFetch(`/api/addresses?user_id=${encodeURIComponent(currentUserId)}`);
+        addresses = data;
+        renderAddressList();
+        renderDestinationSelect();
+    }
+
+    function renderAddressList() {
+        const container = document.getElementById('addressListContainer');
+        if (!addresses.length) {
+            container.innerHTML = '<p>Belum ada alamat.</p>';
+            return;
+        }
+        let html = '';
+        addresses.forEach(addr => {
+            html += `<div class="address-item ${addr.is_default ? 'default' : ''}">
+                <div><strong>${escapeHtml(addr.recipient_name)}</strong> ${addr.label ? `<span>(${escapeHtml(addr.label)})</span>` : ''} ${addr.is_default ? '⭐ Utama' : ''} ${addr.is_store ? '🏬 Toko' : ''}</div>
+                <div>📞 ${escapeHtml(addr.phone)}</div>
+                <div>📍 ${escapeHtml(addr.address)}, ${escapeHtml(addr.district_name)}, ${escapeHtml(addr.city_name)}, ${escapeHtml(addr.province_name)}</div>
+                <div><button onclick="editAddress(${addr.id})">✏️ Edit</button> <button class="btn-danger" onclick="deleteAddress(${addr.id})">🗑️ Hapus</button></div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderDestinationSelect() {
+        const select = document.getElementById('destinationAddressSelect');
+        select.innerHTML = '<option value="">-- Pilih alamat tujuan --</option>';
+        addresses.forEach(addr => {
+            // Jangan tampilkan alamat toko sebagai tujuan? Boleh saja tapi lebih baik hanya alamat non-toko
+            if (addr.is_store) return;
+            const opt = document.createElement('option');
+            opt.value = addr.id;
+            opt.setAttribute('data-area-id', addr.biteship_area_id || '');
+            opt.textContent = `${addr.label || 'Alamat'} - ${addr.recipient_name} (${addr.district_name})`;
+            select.appendChild(opt);
+        });
+    }
+
+    async function loadStoreAddress() {
+        try {
+            const store = await apiFetch('/api/store-address');
+            if (store && store.biteship_area_id) {
+                document.getElementById('originAreaId').value = store.biteship_area_id;
+            } else {
+                document.getElementById('originAreaId').value = '';
+            }
+        } catch (err) {
+            console.error('Gagal memuat alamat toko:', err);
+        }
+    }
+
+    window.editAddress = async (id) => {
+    console.log('Edit address called with id:', id);
+    const addr = addresses.find(a => a.id === id);
+    // Tambahkan di awal script kelola_alamat.html
+console.log('Aplikasi dimulai');
+console.log('API Key:', 'biteship_test.6a0d0a052287f9019372f408');
+    console.log('Address data:', addr);
+    if (!addr) return;
+        editMode = true;
+        editAddressId = id;
+        document.getElementById('formTitle').innerText = 'Edit Alamat';
+        document.getElementById('label').value = addr.label || '';
+        document.getElementById('recipientName').value = addr.recipient_name;
+        document.getElementById('phone').value = addr.phone;
+        document.getElementById('address').value = addr.address;
+        document.getElementById('postalCode').value = addr.postal_code || '';
+        document.getElementById('isDefault').value = addr.is_default ? '1' : '0';
+        document.getElementById('isStore').value = addr.is_store ? '1' : '0';
+        // Load data wilayah
+        await loadProvinces();
+        document.getElementById('provinceSelect').value = addr.province_id;
+        await loadCities(addr.province_id);
+        document.getElementById('citySelect').value = addr.city_id;
+        await loadDistricts(addr.city_id);
+        // Setelah district loaded, set district
+        setTimeout(() => {
+            document.getElementById('districtSelect').value = addr.district_id;
+        }, 100);
+        document.getElementById('cancelEditBtn').style.display = 'inline-block';
+        document.getElementById('submitBtn').innerText = 'Update Alamat';
+    };
+
+    window.deleteAddress = async (id) => {
+        if (!confirm('Hapus alamat ini?')) return;
+        await apiFetch(`/api/addresses/${id}?user_id=${encodeURIComponent(currentUserId)}`, { method: 'DELETE' });
+        await loadAddresses();
+        await loadStoreAddress(); // refresh store jika dihapus
+    };
+
+    function resetForm() {
+        editMode = false;
+        editAddressId = null;
+        document.getElementById('formTitle').innerText = 'Tambah Alamat Baru';
+        document.getElementById('label').value = '';
+        document.getElementById('recipientName').value = '';
+        document.getElementById('phone').value = '';
+        document.getElementById('address').value = '';
+        document.getElementById('postalCode').value = '';
+        document.getElementById('isDefault').value = '0';
+        document.getElementById('isStore').value = '0';
+        document.getElementById('provinceSelect').value = '';
+        document.getElementById('citySelect').innerHTML = '<option value="">-- Pilih Kota --</option>';
+        document.getElementById('districtSelect').innerHTML = '<option value="">-- Pilih Kecamatan --</option>';
+        document.getElementById('cancelEditBtn').style.display = 'none';
+        document.getElementById('submitBtn').innerText = '💾 Simpan Alamat';
+    }
+
+    // Cek Ongkir
+    // Cek Ongkir
+async function cekOngkir() {
+    const destSelect = document.getElementById('destinationAddressSelect');
+    const selectedOption = destSelect.options[destSelect.selectedIndex];
+    const destinationAreaId = selectedOption.getAttribute('data-area-id');
+    if (!destinationAreaId) { 
+        alert('Pilih alamat tujuan'); 
+        return; 
+    }
+    let originAreaId = document.getElementById('originAreaId').value;
+    if (!originAreaId) {
+        await loadStoreAddress();
+        originAreaId = document.getElementById('originAreaId').value;
+        if (!originAreaId) { 
+            alert('Alamat toko belum diatur. Silakan tambah alamat dan centang "Alamat Toko".'); 
+            return; 
+        }
+    }
+    const weight = parseInt(document.getElementById('weight').value);
+    const courier = document.getElementById('courier').value;
+    if (isNaN(weight) || weight <= 0) {
+        alert('Berat harus diisi angka positif');
+        return;
+    }
+    
+    const resultDiv = document.getElementById('ongkirResult');
+    const detailDiv = document.getElementById('costDetail');
+    resultDiv.style.display = 'block';
+    detailDiv.innerHTML = '<div class="loader">⏳ Menghitung ongkir...</div>';
+    
+    try {
+        const result = await apiFetch('/api/biteship/cost', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                origin_area_id: originAreaId, 
+                destination_area_id: destinationAreaId, 
+                weight, 
+                courier 
+            })
+        });
+        
+        if (result && result.length) {
+            let html = `<strong>Kurir: ${courier.toUpperCase()}</strong><br><br>`;
+            result.forEach(cost => {
+                const price = cost.cost ? parseInt(cost.cost).toLocaleString('id-ID') : '0';
+                const etd = cost.etd || '-';
+                html += `<div style="padding: 8px; border-bottom: 1px solid #ddd;">
+                            <b>${cost.service}</b><br>
+                            💰 Rp ${price}<br>
+                            📦 Estimasi: ${etd} hari
+                         </div>`;
+            });
+            detailDiv.innerHTML = html;
+        } else {
+            detailDiv.innerHTML = '<div class="error">Tidak ada layanan ongkir untuk rute ini.</div>';
+        }
+    } catch (err) {
+        detailDiv.innerHTML = `<div class="error">❌ Gagal hitung ongkir: ${err.message}</div>`;
+    }
+}
+
+    // Inisialisasi
+    document.getElementById('loadAddressBtn').onclick = async () => {
+        currentUserId = document.getElementById('userIdInput').value.trim();
+        if (currentUserId) {
+            await loadAddresses();
+            await loadStoreAddress();
+        } else {
+            alert('Masukkan User ID');
+        }
+    };
+    document.getElementById('submitBtn').onclick = saveAddress;
+    document.getElementById('cancelEditBtn').onclick = resetForm;
+    document.getElementById('checkOngkirBtn').onclick = cekOngkir;
+
+    bindFormEvents();
+    loadProvinces();
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>
+</body>
+</html> -->

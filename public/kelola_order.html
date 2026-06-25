@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Order - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3A7B70;
+            border-radius: 10px;
+        }
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 110px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 120px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        .card-custom .card-header-custom {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .card-custom .card-header-custom h3 {
+            color: #2C3E3B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-custom .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Table styling - SAMA dengan halaman lain */
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+            padding: 0.75rem 1rem;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        /* Status badges */
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-pending { background: #FEF3E8; color: #F5A623; }
+        .status-process { background: #E8F0FE; color: #4A90E2; }
+        .status-shipped { background: #E8F5F2; color: #3A7B70; }
+        .status-completed { background: #E8F5F2; color: #3A7B70; }
+        .status-cancelled { background: #FEF3E8; color: #F08A5D; }
+        
+        /* Button styling */
+        .btn-detail {
+            background: #3A7B70;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-detail:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-tracking {
+            background: #F08A5D;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-tracking:hover {
+            background: #d9734a;
+            transform: translateY(-1px);
+        }
+        .btn-generate-awb {
+            background: #4A90E2;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-generate-awb:hover {
+            background: #3a7bc8;
+            transform: translateY(-1px);
+        }
+        .btn-delete-order {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.3rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin: 0.1rem;
+        }
+        .btn-delete-order:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        .btn-update-status {
+            background: #3A7B70;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-update-status:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        
+        /* Toast container */
+        .toast-container-custom {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1200;
+        }
+        .toast-notif {
+            background: #2C3E3B;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: slideInRight 0.3s ease;
+        }
+        .toast-notif.error {
+            background: #F08A5D;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Modal styling */
+        .modal-custom .modal-content {
+            border-radius: 1.25rem;
+            border: none;
+        }
+        .modal-custom .modal-header {
+            border-bottom: 1px solid #eef2f8;
+            padding: 1.25rem 1.5rem;
+        }
+        .modal-custom .modal-footer {
+            border-top: 1px solid #eef2f8;
+            padding: 1rem 1.5rem;
+        }
+        
+        /* AWB Card */
+        .awb-card {
+            background: #F8FAFC;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .awb-number {
+            font-size: 1.2rem;
+            font-weight: bold;
+            font-family: 'Inter', monospace;
+            letter-spacing: 2px;
+            color: #3A7B70;
+        }
+        
+        /* Tracking timeline */
+        .tracking-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+        .tracking-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+        .tracking-item:before {
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: #e2e8f0;
+        }
+        .tracking-item:last-child:before {
+            display: none;
+        }
+        .tracking-dot {
+            position: absolute;
+            left: -26px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #3A7B70;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #3A7B70;
+        }
+        .tracking-date {
+            font-size: 0.7rem;
+            color: #9bb5b0;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 90px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .table-custom th, .table-custom td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 110px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 120px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-box-seam-fill"></i> Kelola Order
+        </h1>
+        <p class="mb-0 opacity-75 small">Manajemen pesanan pelanggan</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Daftar Order -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h3><i class="bi bi-receipt"></i> Daftar Order</h3>
+        </div>
+        <div class="card-body-custom">
+            <div class="table-responsive-custom">
+                <table class="table table-hover align-middle table-custom mb-0" style="min-width: 900px;">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>No. Order</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>No. Resi</th>
+                            <th>Status</th>
+                            <th>Tanggal</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderList">
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="spinner-border text-secondary" role="status"></div>
+                                <p class="mt-2 small text-muted">Memuat data order...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container-custom"></div>
+
+<!-- Modal Detail Order -->
+<div class="modal fade modal-custom" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-dark" id="detailModalLabel"><i class="bi bi-file-text-fill text-success"></i> Detail Order</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" id="modalDetail"></div>
+            <div class="modal-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <label class="fw-semibold small">Update Status:</label>
+                    <select id="statusSelect" class="form-select form-select-sm rounded-pill" style="width: auto;">
+                        <option value="pending">Pending</option>
+                        <option value="process">Process</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button class="btn-update-status" onclick="updateStatus()">Simpan Status</button>
+                </div>
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Generate AWB (No Resi) -->
+<div class="modal fade modal-custom" id="awbModal" tabindex="-1" aria-labelledby="awbModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-upc-scan text-success"></i> Generate No Resi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Pilih Kurir</label>
+                    <select id="awbCourier" class="form-select rounded-pill">
+                        <option value="jne">JNE</option>
+                        <option value="pos">POS Indonesia</option>
+                        <option value="tiki">TIKI</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Layanan</label>
+                    <input type="text" id="awbService" class="form-control rounded-pill" placeholder="Contoh: REG, YES, OKE">
+                </div>
+                <div class="alert alert-light rounded-3 small" style="background: #F8FAFC;">
+                    <i class="bi bi-info-circle text-success"></i> No resi akan digenerate secara otomatis berdasarkan kurir yang dipilih.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
+                <button class="btn btn-primary-custom" onclick="generateAwb()" style="background: #3A7B70;">Generate No Resi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tracking -->
+<div class="modal fade modal-custom" id="trackingModal" tabindex="-1" aria-labelledby="trackingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-geo-alt-fill text-success"></i> Lacak Pengiriman</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" id="trackingContent">
+                <div class="text-center py-4">
+                    <div class="spinner-border text-secondary" role="status"></div>
+                    <p class="mt-2 small text-muted">Memuat data tracking...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const API_BASE_URL = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    const API_ORDERS = `${API_BASE_URL}/api/orders`;
+    const API_ONGKIR = `${API_BASE_URL}/api/ongkir`;
+
+    let currentOrderId = null;
+    let currentOrderData = null;
+    let bsModal = null;
+    let bsAwbModal = null;
+    let bsTrackingModal = null;
+
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notif ${type === 'error' ? 'error' : ''}`;
+        toast.innerHTML = `
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'}"></i>
+            <span>${message}</span>
+        `;
+        
+        toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    async function loadOrders() {
+        const tbody = document.getElementById('orderList');
+        try {
+            const res = await fetch(API_ORDERS);
+            if (!res.ok) throw new Error('Gagal mengambil数据');
+            const orders = await res.json();
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox"></i> Belum ada order</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            orders.forEach(order => {
+                const statusClass = `status-${order.status}`;
+                const formattedTotal = `Rp ${Number(order.total).toLocaleString('id-ID')}`;
+                const dateStr = new Date(order.created_at).toLocaleString('id-ID');
+                const awbDisplay = order.awb_number 
+                    ? `<span class="badge bg-success rounded-pill">${order.awb_number}</span>`
+                    : `<span class="badge bg-secondary rounded-pill">Belum ada</span>`;
+                
+                html += `
+                <tr>
+                    <td class="fw-medium">${order.id}</td>
+                    <td class="fw-semibold">${escapeHtml(order.order_number)}</td>
+                    <td>${escapeHtml(order.customer_name)}</td>
+                    <td>${formattedTotal}</td>
+                    <td>${awbDisplay}</td>
+                    <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+                    <td class="small">${dateStr}</td>
+                    <td class="text-nowrap">
+                        <button class="btn-detail" onclick="viewDetail(${order.id})"><i class="bi bi-eye-fill"></i> Detail</button>
+                        ${!order.awb_number && order.status === 'process' ? `<button class="btn-generate-awb" onclick="openAwbModal(${order.id})"><i class="bi bi-upc-scan"></i> Buat Resi</button>` : ''}
+                        ${order.awb_number ? `<button class="btn-tracking" onclick="viewTracking(${order.id})"><i class="bi bi-geo-alt"></i> Lacak</button>` : ''}
+                        <button class="btn-delete-order" onclick="deleteOrder(${order.id})"><i class="bi bi-trash3"></i> Hapus</button>
+                    </td>
+                </table>
+                `;
+            });
+            tbody.innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">❌ Gagal memuat order: ${err.message}</td></tr>`;
+        }
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function viewDetail(orderId) {
+        currentOrderId = orderId;
+        try {
+            const res = await fetch(`${API_ORDERS}/${orderId}`);
+            if (!res.ok) throw new Error('Gagal ambil detail');
+            const data = await res.json();
+            if (data.success) {
+                currentOrderData = data;
+                const order = data.order;
+                const items = data.items || [];
+
+                let itemsHtml = `
+                <div class="table-responsive mt-3">
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr><th>Produk</th><th>Qty</th><th>Harga</th><th>Total</th></tr>
+                        </thead>
+                        <tbody>
+                `;
+                items.forEach(item => {
+                    itemsHtml += `
+                        <tr>
+                            <td>${escapeHtml(item.name)}</td>
+                            <td class="text-center">${item.quantity}</td>
+                            <td>Rp ${Number(item.price).toLocaleString('id-ID')}</td>
+                            <td>Rp ${Number(item.total).toLocaleString('id-ID')}</td>
+                        </tr>
+                    `;
+                });
+                itemsHtml += `</tbody></table></div>`;
+
+                const awbSection = order.awb_number ? `
+                    <div class="awb-card">
+                        <strong><i class="bi bi-upc-scan"></i> No. Resi:</strong>
+                        <div class="awb-number">${order.awb_number}</div>
+                        <small class="text-muted">Kurir: ${order.shipping_method || '-'}</small>
+                        <button class="btn-tracking mt-2" onclick="viewTracking(${order.id})" style="font-size:0.7rem">Lacak Pengiriman</button>
+                    </div>
+                ` : (order.status === 'process' ? `
+                    <div class="alert alert-warning rounded-3">
+                        <i class="bi bi-exclamation-triangle"></i> Belum ada no resi. 
+                        <button class="btn-generate-awb" onclick="openAwbModal(${order.id})">Buat No Resi Sekarang</button>
+                    </div>
+                ` : `<div class="alert alert-secondary rounded-3">No resi akan dibuat setelah status berubah menjadi "Process"</div>`);
+
+                const detailHtml = `
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <p><strong><i class="bi bi-upc-scan text-success"></i> No. Order:</strong> ${escapeHtml(order.order_number)}</p>
+                        <p><strong><i class="bi bi-person-circle"></i> Customer:</strong> ${escapeHtml(order.customer_name)}</p>
+                        <p><strong><i class="bi bi-telephone"></i> Telepon:</strong> ${escapeHtml(order.phone || '-')}</p>
+                        <p><strong><i class="bi bi-geo-alt"></i> Alamat:</strong> ${escapeHtml(order.address || '-')}, ${escapeHtml(order.city || '-')} - ${escapeHtml(order.postal_code || '-')}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong><i class="bi bi-truck"></i> Kurir:</strong> ${escapeHtml(order.shipping_method)} (Rp ${Number(order.shipping_cost).toLocaleString('id-ID')})</p>
+                        <p><strong><i class="bi bi-credit-card"></i> Pembayaran:</strong> ${escapeHtml(order.payment_method)}</p>
+                        <p><strong><i class="bi bi-chat-text"></i> Pesan:</strong> ${escapeHtml(order.message || '-')}</p>
+                    </div>
+                </div>
+                ${awbSection}
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Subtotal:</strong> Rp ${Number(order.subtotal).toLocaleString('id-ID')}</p>
+                        <p><strong>Diskon:</strong> Rp ${Number(order.discount).toLocaleString('id-ID')}</p>
+                        <p><strong>Ongkir:</strong> Rp ${Number(order.shipping_cost).toLocaleString('id-ID')}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Total:</strong> <span class="fw-bold" style="color: #3A7B70;">Rp ${Number(order.total).toLocaleString('id-ID')}</span></p>
+                        <p><strong>Status saat ini:</strong> <span class="status-badge status-${order.status}">${order.status}</span></p>
+                    </div>
+                </div>
+                <h5 class="mt-3"><i class="bi bi-bag-check text-success"></i> Item Pesanan</h5>
+                ${itemsHtml}
+                `;
+                document.getElementById('modalDetail').innerHTML = detailHtml;
+                document.getElementById('statusSelect').value = order.status;
+                if (bsModal) bsModal.show();
+            } else {
+                showToast('Gagal memuat detail order', 'error');
+            }
+        } catch (err) {
+            showToast('Error: ' + err.message, 'error');
+        }
+    }
+
+    window.updateStatus = async function () {
+        const newStatus = document.getElementById('statusSelect').value;
+        if (!currentOrderId) return;
+        
+        let confirmMessage = '';
+        switch (newStatus) {
+            case 'pending': confirmMessage = 'Ubah status menjadi BELUM BAYAR? Pelanggan akan mendapat notifikasi untuk segera membayar.'; break;
+            case 'process': confirmMessage = 'Ubah status menjadi DIKEMAS? Pelanggan akan mendapat notifikasi pesanan sedang diproses.'; break;
+            case 'shipped': confirmMessage = 'Ubah status menjadi DIKIRIM? Pastikan no resi sudah diisi. Pelanggan akan mendapat notifikasi pengiriman.'; break;
+            case 'completed': confirmMessage = 'Ubah status menjadi SELESAI? Pelanggan akan mendapat notifikasi untuk memberikan ulasan.'; break;
+            case 'cancelled': confirmMessage = 'Ubah status menjadi DIBATALKAN? Pelanggan akan mendapat notifikasi pembatalan.'; break;
+        }
+        
+        if (!confirm(confirmMessage)) return;
+        
+        try {
+            const res = await fetch(`${API_ORDERS}/${currentOrderId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+                showToast(`✅ Status berhasil diupdate menjadi ${newStatus}. Notifikasi sudah dikirim ke pelanggan.`, 'success');
+                if (bsModal) bsModal.hide();
+                loadOrders();
+            } else {
+                showToast(`❌ Gagal update status: ${result.message}`, 'error');
+            }
+        } catch (err) {
+            showToast(`❌ Error: ${err.message}`, 'error');
+        }
+    };
+
+    window.openAwbModal = function(orderId) {
+        currentOrderId = orderId;
+        if (bsAwbModal) bsAwbModal.show();
+    };
+
+    window.generateAwb = async function() {
+        const courier = document.getElementById('awbCourier').value;
+        const service = document.getElementById('awbService').value || 'REG';
+        
+        if (!currentOrderId) return;
+        
+        try {
+            const detailRes = await fetch(`${API_ORDERS}/${currentOrderId}`);
+            const detailData = await detailRes.json();
+            
+            if (!detailData.success) throw new Error('Gagal ambil detail order');
+            
+            const order = detailData.order;
+            
+            const res = await fetch(`${API_ONGKIR}/generate-awb`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    order_id: currentOrderId,
+                    courier: courier,
+                    service: service,
+                    weight: 1000,
+                    origin_city_id: 23,
+                    destination_city_id: order.city_id || 0
+                })
+            });
+            
+            const result = await res.json();
+            
+            if (result.success) {
+                const updateRes = await fetch(`${API_ORDERS}/${currentOrderId}/awb`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        awb_number: result.awb_number,
+                        courier: courier,
+                        service: service
+                    })
+                });
+                
+                const updateResult = await updateRes.json();
+                
+                if (updateResult.success) {
+                    showToast(`✅ No Resi berhasil dibuat: ${result.awb_number}`, 'success');
+                    if (bsAwbModal) bsAwbModal.hide();
+                    loadOrders();
+                    if (bsModal) bsModal.hide();
+                } else {
+                    showToast('❌ Gagal menyimpan no resi', 'error');
+                }
+            } else {
+                showToast('❌ Gagal generate no resi: ' + (result.error || 'Unknown error'), 'error');
+            }
+        } catch (err) {
+            showToast('❌ Error: ' + err.message, 'error');
+        }
+    };
+
+    window.viewTracking = async function(orderId) {
+        if (bsTrackingModal) bsTrackingModal.show();
+        document.getElementById('trackingContent').innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-secondary" role="status"></div>
+                <p class="mt-2 small text-muted">Memuat data tracking...</p>
+            </div>
+        `;
+        
+        try {
+            const res = await fetch(`${API_ORDERS}/${orderId}/tracking`);
+            const result = await res.json();
+            
+            if (result.success && result.tracking) {
+                const tracking = result.tracking;
+                const history = tracking.history || [];
+                
+                let historyHtml = '';
+                if (history.length > 0) {
+                    historyHtml = `
+                    <div class="tracking-timeline mt-3">
+                        ${history.map((item, index) => `
+                            <div class="tracking-item">
+                                <div class="tracking-dot"></div>
+                                <div class="fw-bold small">${escapeHtml(item.status)}</div>
+                                <div class="tracking-date">${item.date ? new Date(item.date).toLocaleString('id-ID') : '-'}</div>
+                                <div class="text-muted small">${escapeHtml(item.location || '')}</div>
+                                <div class="text-muted small">${escapeHtml(item.description || '')}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    `;
+                } else {
+                    historyHtml = `<div class="alert alert-info rounded-3 mt-3 small">Belum ada update tracking. No resi akan aktif dalam 1x24 jam.</div>`;
+                }
+                
+                const trackingHtml = `
+                    <div class="text-center mb-3">
+                        <div class="awb-number">${escapeHtml(result.awb_number)}</div>
+                        <div class="text-muted small">${escapeHtml(result.shipping_method || '-')}</div>
+                        <span class="status-badge ${tracking.status === 'IN_TRANSIT' ? 'status-shipped' : 'status-pending'} mt-2">
+                            ${tracking.status === 'IN_TRANSIT' ? 'Dalam Pengiriman' : (tracking.status || 'Diproses')}
+                        </span>
+                    </div>
+                    ${historyHtml}
+                `;
+                
+                document.getElementById('trackingContent').innerHTML = trackingHtml;
+            } else {
+                document.getElementById('trackingContent').innerHTML = `
+                    <div class="alert alert-warning rounded-3">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        ${result.message || 'Belum ada data tracking untuk order ini'}
+                    </div>
+                `;
+            }
+        } catch (err) {
+            document.getElementById('trackingContent').innerHTML = `
+                <div class="alert alert-danger rounded-3">
+                    <i class="bi bi-exclamation-circle"></i> 
+                    Error: ${err.message}
+                </div>
+            `;
+        }
+    };
+
+    window.deleteOrder = async function(orderId) {
+        if (!confirm('Yakin ingin menghapus order ini? Tindakan permanen.')) return;
+        try {
+            const res = await fetch(`${API_ORDERS}/${orderId}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (result.success) {
+                showToast('✅ Order berhasil dihapus', 'success');
+                loadOrders();
+            } else {
+                showToast('❌ Gagal menghapus order', 'error');
+            }
+        } catch (err) {
+            showToast('❌ Error: ' + err.message, 'error');
+        }
+    };
+
+    window.onload = () => {
+        const modalEl = document.getElementById('detailModal');
+        const awbModalEl = document.getElementById('awbModal');
+        const trackingModalEl = document.getElementById('trackingModal');
+        
+        if (modalEl) bsModal = new bootstrap.Modal(modalEl);
+        if (awbModalEl) bsAwbModal = new bootstrap.Modal(awbModalEl);
+        if (trackingModalEl) bsTrackingModal = new bootstrap.Modal(trackingModalEl);
+        
+        loadOrders();
+        setInterval(loadOrders, 30000);
+    };
+</script>
+</body>
+</html>

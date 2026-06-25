@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Ulasan - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 130px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 140px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Custom card styling */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            height: 100%;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Stat Box */
+        .stat-box {
+            border-radius: 1.25rem;
+            transition: all 0.2s;
+            background: white;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Filter bar */
+        .filter-bar {
+            background: white;
+            border-radius: 1.25rem;
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #eef2f8;
+        }
+        
+        /* Table styling */
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+            padding: 0.75rem 1rem;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        /* Badge status */
+        .status-badge-active {
+            background: #E8F5F2;
+            color: #3A7B70;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-badge-hidden {
+            background: #FEF3E8;
+            color: #F08A5D;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-badge-reported {
+            background: #FEF3E8;
+            color: #F5A623;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        /* Rating stars */
+        .rating-stars {
+            color: #ffc107;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+        
+        /* Review text truncate */
+        .review-text {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        @media (min-width: 1400px) {
+            .review-text {
+                max-width: 350px;
+            }
+        }
+        
+        /* Button actions */
+        .btn-action {
+            padding: 0.3rem 0.6rem;
+            margin: 0.15rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+        .btn-action:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* Image gallery */
+        .image-gallery {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .image-thumb {
+            width: 48px;
+            height: 48px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .image-thumb:hover {
+            border-color: #3A7B70;
+            transform: scale(1.05);
+        }
+        .image-count-badge {
+            background: #3A7B70;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .image-count-badge:hover {
+            background: #2c5e55;
+            transform: scale(1.05);
+        }
+        
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .lightbox-close:hover {
+            color: #F08A5D;
+        }
+        .lightbox-prev, .lightbox-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 40px;
+            cursor: pointer;
+            padding: 20px;
+            transition: 0.2s;
+        }
+        .lightbox-prev { left: 10px; }
+        .lightbox-next { right: 10px; }
+        .lightbox-prev:hover, .lightbox-next:hover {
+            color: #3A7B70;
+        }
+        
+        /* Pagination */
+        .page-link-custom {
+            border-radius: 0.5rem !important;
+            margin: 0 0.2rem;
+            color: #3A7B70;
+        }
+        .page-item.active .page-link {
+            background-color: #3A7B70;
+            border-color: #3A7B70;
+        }
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-outline-custom {
+            border-radius: 2rem;
+            border: 1px solid #dee2e6;
+            padding: 0.4rem 1rem;
+            transition: 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        
+        /* Modal styling */
+        .modal-custom .modal-content {
+            border-radius: 1.25rem;
+            border: none;
+        }
+        .modal-custom .modal-header {
+            border-bottom: 1px solid #eef2f8;
+            padding: 1.25rem 1.5rem;
+        }
+        .modal-custom .modal-footer {
+            border-top: 1px solid #eef2f8;
+            padding: 1rem 1.5rem;
+        }
+        
+        /* Review modal image */
+        .review-modal-img {
+            max-width: 100%;
+            max-height: 180px;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .review-modal-img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 105px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .stat-box {
+                padding: 0.9rem !important;
+            }
+            .table-custom th, .table-custom td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            .review-text {
+                max-width: 120px;
+            }
+            .image-thumb {
+                width: 36px;
+                height: 36px;
+            }
+            .btn-action {
+                padding: 0.2rem 0.4rem;
+                font-size: 0.7rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 130px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 140px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-star-fill"></i> Kelola Ulasan
+        </h1>
+        <p class="mb-0 opacity-75 small">Kelola ulasan dan rating produk dari pelanggan</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Statistik - 4 card sejajar -->
+    <div class="row g-4 mb-4" id="statsContainer">
+        <div class="col-md-3 col-6">
+            <div class="stat-box bg-white p-3 text-center">
+                <i class="bi bi-chat-dots-fill fs-2 text-success"></i>
+                <h2 class="fw-bold text-success mb-0" id="totalReviews">0</h2>
+                <p class="small text-secondary mb-0">Total Ulasan</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-box bg-white p-3 text-center">
+                <i class="bi bi-eye-fill fs-2 text-primary"></i>
+                <h2 class="fw-bold text-primary mb-0" id="activeReviews">0</h2>
+                <p class="small text-secondary mb-0">Aktif</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-box bg-white p-3 text-center">
+                <i class="bi bi-eye-slash-fill fs-2 text-danger"></i>
+                <h2 class="fw-bold text-danger mb-0" id="hiddenReviews">0</h2>
+                <p class="small text-secondary mb-0">Disembunyikan</p>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stat-box bg-white p-3 text-center">
+                <i class="bi bi-star-fill fs-2 text-warning"></i>
+                <h2 class="fw-bold text-warning mb-0" id="avgRating">0</h2>
+                <p class="small text-secondary mb-0">Rata-rata Rating</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small text-secondary"><i class="bi bi-funnel"></i> Filter Status</label>
+                <select id="filterStatus" class="form-select rounded-pill">
+                    <option value="all">Semua Status</option>
+                    <option value="active">Aktif</option>
+                    <option value="hidden">Disembunyikan</option>
+                    <option value="reported">Dilaporkan</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small text-secondary"><i class="bi bi-star"></i> Filter Rating</label>
+                <select id="filterRating" class="form-select rounded-pill">
+                    <option value="all">Semua Rating</option>
+                    <option value="5">⭐⭐⭐⭐⭐ 5 Bintang</option>
+                    <option value="4">⭐⭐⭐⭐☆ 4 Bintang</option>
+                    <option value="3">⭐⭐⭐☆☆ 3 Bintang</option>
+                    <option value="2">⭐⭐☆☆☆ 2 Bintang</option>
+                    <option value="1">⭐☆☆☆☆ 1 Bintang</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-semibold small text-secondary"><i class="bi bi-search"></i> Cari Produk/User</label>
+                <input type="text" id="searchInput" class="form-control rounded-pill" placeholder="Cari nama produk atau pengguna...">
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary-custom text-white w-100" onclick="loadReviews()">
+                    <i class="bi bi-search"></i> Cari
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daftar Ulasan Card -->
+    <div class="card card-custom">
+        <div class="card-body p-0 p-md-3">
+            <div class="p-3 pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-chat-dots-fill text-success"></i> Daftar Ulasan Pengguna</h5>
+                <button class="btn btn-outline-custom btn-sm" onclick="loadReviews(1)">
+                    <i class="bi bi-arrow-repeat"></i> Refresh
+                </button>
+            </div>
+            <div class="table-responsive-custom p-3 pt-2">
+                <table class="table table-hover align-middle table-custom mb-0" style="min-width: 900px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">ID</th>
+                            <th style="width: 15%;">Produk</th>
+                            <th style="width: 15%;">Pengguna</th>
+                            <th style="width: 10%;">Rating</th>
+                            <th style="width: 20%;">Ulasan</th>
+                            <th style="width: 10%;">Gambar</th>
+                            <th style="width: 10%;">Status</th>
+                            <th style="width: 10%;">Tanggal</th>
+                            <th style="width: 5%;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewList">
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <div class="spinner-border text-secondary" role="status"></div>
+                                <p class="mt-2 small text-muted">Memuat ulasan...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="pagination" class="d-flex justify-content-center mt-4"></div>
+                <div class="text-center text-muted small mt-2" id="paginationInfo"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 pb-3">
+        <p class="small text-secondary m-0">© 2026 Mabruk Geutanyoe Hijab Store — Kelola ulasan dan rating produk</p>
+    </div>
+</div>
+
+<!-- Modal Detail Ulasan -->
+<div class="modal fade modal-custom" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-file-text-fill text-success"></i> Detail Ulasan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" id="modalDetail"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Balas Ulasan -->
+<div class="modal fade modal-custom" id="replyModal" tabindex="-1" aria-labelledby="replyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-reply-fill text-success"></i> Balas Ulasan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Ulasan Pengguna:</label>
+                    <div class="alert alert-light rounded-3" id="originalReview" style="background: #F8FAFE;"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Balasan Admin:</label>
+                    <textarea id="replyText" class="form-control rounded-3" rows="4" placeholder="Tulis balasan untuk ulasan ini..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary-custom text-white" onclick="submitReply()">Kirim Balasan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const API_BASE_URL = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    const API_REVIEWS = `${API_BASE_URL}/api/reviews`;
+    
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentReviewId = null;
+    let bsModal = null;
+    let bsReplyModal = null;
+
+    let currentImagesList = [];
+    let currentImageIndex = 0;
+
+    function showLightbox(images, index) {
+        currentImagesList = images;
+        currentImageIndex = index;
+        const lightbox = document.createElement('div');
+        lightbox.className = 'lightbox';
+        lightbox.id = 'lightbox';
+        lightbox.innerHTML = `
+            <div class="lightbox-close" onclick="closeLightbox()">&times;</div>
+            <div class="lightbox-prev" onclick="prevImage()">&#10094;</div>
+            <div class="lightbox-next" onclick="nextImage()">&#10095;</div>
+            <img id="lightbox-img" src="${API_BASE_URL}/uploads/reviews/${images[index]}" alt="Review Image">
+        `;
+        document.body.appendChild(lightbox);
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox) lightbox.remove();
+        document.body.style.overflow = '';
+    }
+
+    function prevImage() {
+        currentImageIndex = (currentImageIndex - 1 + currentImagesList.length) % currentImagesList.length;
+        const img = document.getElementById('lightbox-img');
+        if (img) img.src = `${API_BASE_URL}/uploads/reviews/${currentImagesList[currentImageIndex]}`;
+    }
+
+    function nextImage() {
+        currentImageIndex = (currentImageIndex + 1) % currentImagesList.length;
+        const img = document.getElementById('lightbox-img');
+        if (img) img.src = `${API_BASE_URL}/uploads/reviews/${currentImagesList[currentImageIndex]}`;
+    }
+
+    window.showLightbox = showLightbox;
+    window.closeLightbox = closeLightbox;
+    window.prevImage = prevImage;
+    window.nextImage = nextImage;
+
+    async function loadReviews(page = 1) {
+        currentPage = page;
+        const status = document.getElementById('filterStatus').value;
+        const rating = document.getElementById('filterRating').value;
+        const search = document.getElementById('searchInput').value;
+        
+        const tbody = document.getElementById('reviewList');
+        tbody.innerHTML = `<tr><td colspan="9" class="text-center py-5"><div class="spinner-border text-secondary"></div><p class="mt-2 small text-muted">Memuat ulasan...</p></td></tr>`;
+        
+        try {
+            let url = `${API_REVIEWS}/admin?page=${page}&limit=20`;
+            if (status !== 'all') url += `&status=${status}`;
+            if (rating !== 'all') url += `&rating=${rating}`;
+            if (search) url += `&search=${encodeURIComponent(search)}`;
+            
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Gagal mengambil data');
+            const data = await res.json();
+            
+            if (data.success) {
+                displayReviews(data.reviews);
+                updateStats(data.stats);
+                updatePagination(data.page, data.totalPages, data.total);
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (err) {
+            console.error(err);
+            tbody.innerHTML = `<tr><td colspan="9" class="text-center text-danger py-4"><i class="bi bi-exclamation-triangle-fill"></i> Gagal memuat ulasan: ${err.message}</td></tr>`;
+        }
+    }
+
+    function displayReviews(reviews) {
+        const tbody = document.getElementById('reviewList');
+        if (!reviews || reviews.length === 0) {
+            tbody.innerHTML = `<table><td colspan="9" class="text-center text-muted py-4"><i class="bi bi-inbox"></i> Belum ada ulasan</td></tr>`;
+            return;
+        }
+        
+        let html = '';
+        reviews.forEach(review => {
+            const statusClass = review.status === 'active' ? 'status-badge-active' : 
+                               (review.status === 'hidden' ? 'status-badge-hidden' : 'status-badge-reported');
+            const statusText = review.status === 'active' ? 'Aktif' : 
+                              (review.status === 'hidden' ? 'Disembunyikan' : 'Dilaporkan');
+            const dateStr = new Date(review.created_at).toLocaleString('id-ID');
+            const ratingStars = '⭐'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const hasImages = review.images && review.images.length > 0;
+            const imagesList = review.images || [];
+            
+            let displayName = 'Anonymous';
+            let isAnonymous = review.is_anonymous === 1 || review.is_anonymous === true;
+            
+            if (!isAnonymous) {
+                displayName = review.user_name || 'Pengguna';
+            }
+            
+            let imagesHtml = '';
+            if (hasImages && imagesList.length > 0) {
+                if (imagesList.length === 1) {
+                    imagesHtml = `<img src="${API_BASE_URL}/uploads/reviews/${imagesList[0]}" class="image-thumb" onclick="showLightbox(${JSON.stringify(imagesList).replace(/"/g, '&quot;')}, 0)">`;
+                } else {
+                    imagesHtml = `<div class="image-gallery">
+                        ${imagesList.slice(0, 2).map((img, idx) => 
+                            `<img src="${API_BASE_URL}/uploads/reviews/${img}" class="image-thumb" onclick="showLightbox(${JSON.stringify(imagesList).replace(/"/g, '&quot;')}, ${idx})">`
+                        ).join('')}
+                        ${imagesList.length > 2 ? `<div class="image-count-badge" onclick="showLightbox(${JSON.stringify(imagesList).replace(/"/g, '&quot;')}, 0)">+${imagesList.length - 2}</div>` : ''}
+                    </div>`;
+                }
+            } else {
+                imagesHtml = '<span class="text-muted small">-</span>';
+            }
+            
+            html += `
+            <tr>
+                <td><small class="fw-bold">${review.id}</small></td>
+                <td>
+                    <strong class="text-dark">${escapeHtml(review.product_name || 'Produk')}</strong><br>
+                    <small class="text-muted">ID: ${review.product_id}</small>
+                </td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi ${isAnonymous ? 'bi-incognito text-secondary' : 'bi-person-circle text-primary'}" style="font-size: 1.2rem;"></i>
+                        <div>
+                            <strong class="${isAnonymous ? 'text-secondary' : 'text-dark'}">${escapeHtml(displayName)}</strong><br>
+                            <small class="text-muted">${review.user_id ? review.user_id.substring(0, 12) + '...' : '-'}</small>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="rating-stars">${ratingStars}</div>
+                    <small class="text-muted">${review.rating}/5</small>
+                </td>
+                <td>
+                    <div class="review-text" title="${escapeHtml(review.review)}">
+                        ${escapeHtml(review.review.substring(0, 100))}${review.review.length > 100 ? '...' : ''}
+                    </div>
+                </td>
+                <td>${imagesHtml}</td>
+                <td><span class="${statusClass}">${statusText}</span></td>
+                <td style="font-size: 0.75rem;">${dateStr}</td>
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button class="btn-action btn btn-sm btn-info text-white" onclick="viewDetail(${review.id})" title="Detail">
+                            <i class="bi bi-eye-fill"></i>
+                        </button>
+                        <button class="btn-action btn btn-sm btn-warning text-white" onclick="openReplyModal(${review.id}, '${escapeHtml(review.review).replace(/'/g, "\\'").replace(/\n/g, ' ')}')" title="Balas">
+                            <i class="bi bi-reply-fill"></i>
+                        </button>
+                        ${review.status === 'active' ? 
+                            `<button class="btn-action btn btn-sm btn-danger" onclick="changeStatus(${review.id}, 'hidden')" title="Sembunyikan">
+                                <i class="bi bi-eye-slash-fill"></i>
+                            </button>` :
+                            `<button class="btn-action btn btn-sm btn-success" onclick="changeStatus(${review.id}, 'active')" title="Tampilkan">
+                                <i class="bi bi-eye-fill"></i>
+                            </button>`
+                        }
+                    </div>
+                </td>
+            </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function updateStats(stats) {
+        if (stats) {
+            document.getElementById('totalReviews').textContent = stats.total || 0;
+            document.getElementById('activeReviews').textContent = stats.active || 0;
+            document.getElementById('hiddenReviews').textContent = stats.hidden || 0;
+            
+            let avgRating = 0;
+            if (stats.avg_rating) {
+                avgRating = typeof stats.avg_rating === 'string' ? parseFloat(stats.avg_rating) : stats.avg_rating;
+            }
+            document.getElementById('avgRating').textContent = avgRating.toFixed(1);
+        }
+    }
+
+    function updatePagination(page, totalPages, total) {
+        const pagination = document.getElementById('pagination');
+        const paginationInfo = document.getElementById('paginationInfo');
+        
+        const start = (page - 1) * 20 + 1;
+        const end = Math.min(page * 20, total);
+        paginationInfo.innerHTML = `Menampilkan ${start}-${end} dari ${total} ulasan`;
+        
+        if (totalPages <= 1) {
+            pagination.innerHTML = '';
+            return;
+        }
+        
+        let html = '<ul class="pagination pagination-sm">';
+        html += `<li class="page-item ${page === 1 ? 'disabled' : ''}">
+                    <a class="page-link page-link-custom" href="#" onclick="loadReviews(${page - 1}); return false;">«</a>
+                </li>`;
+        
+        const startPage = Math.max(1, page - 2);
+        const endPage = Math.min(totalPages, page + 2);
+        
+        for (let i = startPage; i <= endPage; i++) {
+            html += `<li class="page-item ${i === page ? 'active' : ''}">
+                        <a class="page-link page-link-custom" href="#" onclick="loadReviews(${i}); return false;">${i}</a>
+                    </li>`;
+        }
+        
+        html += `<li class="page-item ${page === totalPages ? 'disabled' : ''}">
+                    <a class="page-link page-link-custom" href="#" onclick="loadReviews(${page + 1}); return false;">»</a>
+                </li>`;
+        html += '</ul>';
+        pagination.innerHTML = html;
+    }
+
+    async function viewDetail(reviewId) {
+        try {
+            const res = await fetch(`${API_REVIEWS}/${reviewId}`);
+            const data = await res.json();
+            
+            if (data.success) {
+                const review = data.review;
+                const ratingStars = '⭐'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                const imagesList = review.images || [];
+                
+                let imagesHtml = '';
+                if (imagesList.length > 0) {
+                    imagesHtml = `
+                    <div class="mt-3">
+                        <strong class="text-dark">Gambar Ulasan:</strong>
+                        <div class="row mt-2 g-2">
+                            ${imagesList.map((img, idx) => `
+                                <div class="col-md-3 col-4">
+                                    <img src="${API_BASE_URL}/uploads/reviews/${img}" class="review-modal-img w-100" onclick="showLightbox(${JSON.stringify(imagesList).replace(/"/g, '&quot;')}, ${idx})">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    `;
+                }
+                
+                const replyHtml = review.admin_reply ? `
+                    <div class="alert alert-success mt-3 rounded-3" style="background: #E8F5F2; border: none;">
+                        <strong><i class="bi bi-reply-fill text-success"></i> Balasan Admin:</strong><br>
+                        ${escapeHtml(review.admin_reply)}
+                        <div class="text-muted small mt-1">${new Date(review.replied_at).toLocaleString('id-ID')}</div>
+                    </div>
+                ` : '';
+                
+                const detailHtml = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong><i class="bi bi-hash"></i> ID Ulasan:</strong> ${review.id}</p>
+                        <p><strong><i class="bi bi-box"></i> Produk:</strong> ${escapeHtml(review.product_name || 'Produk')}</p>
+                        <p><strong><i class="bi bi-person"></i> Pengguna:</strong> ${escapeHtml(review.display_name || review.user_name)}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong><i class="bi bi-star-fill text-warning"></i> Rating:</strong> ${ratingStars} (${review.rating}/5)</p>
+                        <p><strong><i class="bi bi-tag"></i> Status:</strong> <span class="${review.status === 'active' ? 'status-badge-active' : (review.status === 'hidden' ? 'status-badge-hidden' : 'status-badge-reported')}">${review.status === 'active' ? 'Aktif' : (review.status === 'hidden' ? 'Disembunyikan' : 'Dilaporkan')}</span></p>
+                        <p><strong><i class="bi bi-calendar"></i> Tanggal:</strong> ${new Date(review.created_at).toLocaleString('id-ID')}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <strong><i class="bi bi-chat-left-text"></i> Ulasan:</strong>
+                    <div class="alert mt-2 rounded-3" style="background: #F8FAFE;">${escapeHtml(review.review)}</div>
+                </div>
+                ${imagesHtml}
+                ${replyHtml}
+                `;
+                
+                document.getElementById('modalDetail').innerHTML = detailHtml;
+                if (bsModal) bsModal.show();
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    window.openReplyModal = function(reviewId, reviewText) {
+        currentReviewId = reviewId;
+        document.getElementById('originalReview').innerHTML = reviewText;
+        document.getElementById('replyText').value = '';
+        if (bsReplyModal) bsReplyModal.show();
+    };
+
+    window.submitReply = async function() {
+        const reply = document.getElementById('replyText').value.trim();
+        if (!reply) {
+            alert('Silakan tulis balasan terlebih dahulu');
+            return;
+        }
+        
+        try {
+            const res = await fetch(`${API_REVIEWS}/${currentReviewId}/reply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reply: reply })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                alert('Balasan berhasil dikirim');
+                if (bsReplyModal) bsReplyModal.hide();
+                loadReviews(currentPage);
+            } else {
+                alert('Gagal: ' + (data.message || 'Unknown error'));
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    window.changeStatus = async function(reviewId, newStatus) {
+        const confirmMsg = newStatus === 'hidden' ? 'Yakin ingin menyembunyikan ulasan ini?' :
+                          (newStatus === 'active' ? 'Yakin ingin menampilkan ulasan ini?' : 'Yakin ingin mengubah status?');
+        
+        if (!confirm(confirmMsg)) return;
+        
+        try {
+            const res = await fetch(`${API_REVIEWS}/${reviewId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                alert('Status berhasil diubah');
+                loadReviews(currentPage);
+            } else {
+                alert('Gagal: ' + (data.message || 'Unknown error'));
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    document.getElementById('filterStatus').addEventListener('change', () => loadReviews(1));
+    document.getElementById('filterRating').addEventListener('change', () => loadReviews(1));
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') loadReviews(1);
+    });
+
+    window.onload = () => {
+        const modalEl = document.getElementById('detailModal');
+        const replyModalEl = document.getElementById('replyModal');
+        if (modalEl) bsModal = new bootstrap.Modal(modalEl);
+        if (replyModalEl) bsReplyModal = new bootstrap.Modal(replyModalEl);
+        loadReviews();
+    };
+</script>
+</body>
+</html>

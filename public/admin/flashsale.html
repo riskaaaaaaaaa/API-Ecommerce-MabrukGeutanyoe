@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Flash Sale - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3A7B70;
+            border-radius: 10px;
+        }
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 110px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 120px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        .card-custom .card-header-custom {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .card-custom .card-header-custom h2 {
+            color: #2C3E3B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-custom .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.5rem 1.2rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Form styling - SAMA dengan halaman lain */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        select.form-control-custom {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233A7B70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+        
+        input[type="number"].form-control-custom::-webkit-inner-spin-button,
+        input[type="number"].form-control-custom::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid #dee2e6;
+            color: #5a6e6a;
+            border-radius: 2rem;
+            padding: 0.7rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+        .btn-edit-custom {
+            background: #E8F0FE;
+            border: none;
+            color: #4A90E2;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            margin-right: 0.25rem;
+        }
+        .btn-edit-custom:hover {
+            background: #d4e4fc;
+            transform: translateY(-1px);
+        }
+        .btn-delete-custom {
+            background: #FEF3E8;
+            border: none;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-delete-custom:hover {
+            background: #FEF3E8;
+            transform: translateY(-1px);
+        }
+        
+        /* Table styling - SAMA dengan halaman lain */
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+            padding: 0.75rem 1rem;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .product-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 0.75rem;
+            object-fit: cover;
+            border: 1px solid #eef2f8;
+        }
+        .price-old {
+            text-decoration: line-through;
+            color: #9bb5b0;
+            font-size: 0.75rem;
+        }
+        .price-flash {
+            color: #F08A5D;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .discount-badge {
+            background: #F08A5D;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .countdown {
+            color: #F08A5D;
+            font-weight: bold;
+            font-family: 'Inter', monospace;
+            font-size: 0.85rem;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6B7C7A;
+        }
+        
+        /* Toast - SAMA dengan halaman lain */
+        .toast-notif {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2C3E3B;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1200;
+            font-size: 0.85rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: slideInRight 0.3s ease;
+        }
+        .toast-notif.error {
+            background: #F08A5D;
+        }
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* Badge count */
+        .badge-count {
+            background: #3A7B70;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 85px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.75rem 1rem;
+            }
+            .table-custom th, .table-custom td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            .product-image {
+                width: 36px;
+                height: 36px;
+            }
+            .btn-edit-custom, .btn-delete-custom {
+                padding: 0.3rem 0.7rem;
+                font-size: 0.7rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 110px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 120px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h3 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-lightning-charge-fill"></i> Kelola Flash Sale
+        </h1>
+        <p class="mb-0 opacity-75 small">Atur produk diskon waktu terbatas</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='../index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Form Flash Sale -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h2><i class="bi bi-plus-circle-fill"></i> Buat / Edit Flash Sale</h2>
+        </div>
+        <div class="card-body-custom">
+            <form id="flashSaleForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-box-seam"></i> Pilih Produk</label>
+                        <select id="product" class="form-control-custom" required>
+                            <option value="">-- Pilih Produk --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-percent"></i> Diskon (%)</label>
+                        <input type="number" id="discount" class="form-control-custom" placeholder="Contoh: 20" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label-custom"><i class="bi bi-clock"></i> Durasi (Jam)</label>
+                        <input type="number" id="duration" class="form-control-custom" placeholder="Contoh: 3" required>
+                    </div>
+                    <div class="col-12 mt-3 d-flex gap-2">
+                        <button type="button" class="btn btn-primary-custom" onclick="saveFlashSale()">
+                            <i class="bi bi-save-fill me-1"></i> Simpan Flash Sale
+                        </button>
+                        <button type="reset" class="btn btn-outline-custom" id="resetFormBtn">
+                            <i class="bi bi-arrow-repeat me-1"></i> Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Daftar Flash Sale -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h2><i class="bi bi-table"></i> Daftar Flash Sale Aktif</h2>
+            <span class="badge-count" id="flashCount">0</span>
+        </div>
+        <div class="card-body-custom">
+            <div class="table-responsive-custom">
+                <table class="table table-hover align-middle table-custom mb-0" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th>Gambar</th>
+                            <th>Produk</th>
+                            <th>Harga Asli</th>
+                            <th>Harga Flash</th>
+                            <th>Diskon</th>
+                            <th>Sisa Waktu</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="flashsaleTable">
+                        <tr>
+                            <td colspan="7" class="empty-state">
+                                <div class="spinner-border text-secondary spinner-border-sm-custom" role="status"></div>
+                                <p class="mt-2 small text-muted">Memuat data...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer"></div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const BASE_API = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    let editId = null;
+
+    function showToast(message, isError = false) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notif ${isError ? 'error' : ''}`;
+        toast.innerHTML = `
+            <i class="bi ${isError ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill'}"></i>
+            <span>${message}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+
+    async function loadProducts() {
+        const productSelect = document.getElementById('product');
+        try {
+            const res = await fetch(`${BASE_API}/api/products`);
+            if (!res.ok) throw new Error('Gagal memuat produk');
+            const data = await res.json();
+            let html = '<option value="">-- Pilih Produk --</option>';
+            data.forEach(item => {
+                html += `<option value="${item.id}">${escapeHtml(item.name)}</option>`;
+            });
+            productSelect.innerHTML = html;
+        } catch (err) {
+            console.error('Error loadProducts:', err);
+            productSelect.innerHTML = '<option value="">Gagal memuat produk</option>';
+            showToast('Gagal memuat daftar produk', true);
+        }
+    }
+
+    function formatRupiah(number) {
+        if (number === undefined || number === null) return 'Rp 0';
+        return 'Rp ' + parseInt(number).toLocaleString('id-ID');
+    }
+
+    function formatTime(seconds) {
+        if (seconds <= 0) return '00:00:00';
+        const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+        const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+
+    async function loadFlashSale() {
+        const tbody = document.getElementById('flashsaleTable');
+        try {
+            const res = await fetch(`${BASE_API}/api/flashsale`);
+            if (!res.ok) throw new Error('Gagal memuat flash sale');
+            const data = await res.json();
+            const flashCountSpan = document.getElementById('flashCount');
+            flashCountSpan.innerText = data.length;
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">📭 Tidak ada flash sale aktif</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            for (const item of data) {
+                let imageUrl = item.image;
+                if (!imageUrl) {
+                    imageUrl = 'https://placehold.co/400x400?text=No+Image';
+                }
+                
+                html += `
+                    <tr>
+                        <td><img src="${escapeHtml(imageUrl)}" class="product-image" onerror="this.src='https://placehold.co/400x400?text=No+Image'"></td>
+                        <td class="fw-semibold">${escapeHtml(item.name)}</td>
+                        <td><span class="price-old">${formatRupiah(item.original_price)}</span></td>
+                        <td><span class="price-flash">${formatRupiah(item.flash_price)}</span></td>
+                        <td><span class="discount-badge">${item.discount_percent}% OFF</span></td>
+                        <td><span class="countdown" data-seconds="${item.remaining_seconds}">${formatTime(item.remaining_seconds)}</span></td>
+                        <td>
+                            <button class="btn-edit-custom" onclick='editFlashSale(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+                            <button class="btn-delete-custom" onclick="deleteFlashSale(${item.id})">
+                                <i class="bi bi-trash3"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+            tbody.innerHTML = html;
+        } catch (err) {
+            console.error('Error loadFlashSale:', err);
+            tbody.innerHTML = `<tr><td colspan="7" class="empty-state text-danger">❌ Gagal memuat data: ${err.message}</td></tr>`;
+            showToast('Gagal memuat data flash sale', true);
+        }
+    }
+
+    let countdownInterval;
+    
+    function startCountdownInterval() {
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(() => {
+            const countdowns = document.querySelectorAll('.countdown');
+            let needRefresh = false;
+            countdowns.forEach(el => {
+                let seconds = parseInt(el.dataset.seconds);
+                if (seconds > 0) {
+                    seconds--;
+                    el.dataset.seconds = seconds;
+                    el.innerHTML = formatTime(seconds);
+                } else if (seconds === 0) {
+                    needRefresh = true;
+                }
+            });
+            if (needRefresh) loadFlashSale();
+        }, 1000);
+    }
+
+    async function saveFlashSale() {
+        const product_id = document.getElementById('product').value;
+        const discount_percent = document.getElementById('discount').value;
+        const duration_hours = document.getElementById('duration').value;
+
+        if (!product_id || !discount_percent || !duration_hours) {
+            showToast('Lengkapi semua data!', true);
+            return;
+        }
+        if (discount_percent <= 0 || discount_percent > 100) {
+            showToast('Diskon harus antara 1-100%', true);
+            return;
+        }
+        if (duration_hours <= 0) {
+            showToast('Durasi harus lebih dari 0 jam', true);
+            return;
+        }
+
+        const url = editId ? `${BASE_API}/api/flashsale/${editId}` : `${BASE_API}/api/flashsale`;
+        const method = editId ? 'PUT' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_id, discount_percent, duration_hours })
+            });
+            
+            const result = await res.json();
+            
+            if (!res.ok) throw new Error(result.message || 'Gagal menyimpan');
+            
+            if (result.notificationSent !== undefined) {
+                showToast(`✅ ${result.message}`);
+            } else {
+                showToast(`✅ ${editId ? 'Flash sale berhasil diupdate' : 'Flash sale berhasil dibuat'}`);
+            }
+            
+            document.getElementById('discount').value = '';
+            document.getElementById('duration').value = '';
+            document.getElementById('product').value = '';
+            editId = null;
+            
+            const formTitle = document.querySelector('#flashSaleForm').closest('.card-custom').querySelector('.card-header-custom h2');
+            if (formTitle) {
+                formTitle.innerHTML = '<i class="bi bi-plus-circle-fill"></i> Buat / Edit Flash Sale';
+            }
+            
+            await loadFlashSale();
+            
+        } catch (err) {
+            console.error('Error saveFlashSale:', err);
+            showToast(`❌ Error: ${err.message}`, true);
+        }
+    }
+
+    function editFlashSale(item) {
+        console.log('Editing flash sale:', item);
+        
+        editId = item.id;
+        document.getElementById('product').value = item.product_id;
+        document.getElementById('discount').value = item.discount_percent;
+        document.getElementById('duration').value = item.duration_hours;
+        
+        document.querySelector('.card-custom').scrollIntoView({ behavior: 'smooth' });
+        
+        const formTitle = document.querySelector('#flashSaleForm').closest('.card-custom').querySelector('.card-header-custom h2');
+        if (formTitle) {
+            formTitle.innerHTML = '<i class="bi bi-pencil-square"></i> Edit Flash Sale';
+        }
+        
+        showToast('Silakan edit data flash sale', false);
+    }
+
+    async function deleteFlashSale(id) {
+        if (!confirm('Hapus flash sale ini? Tindakan permanen.')) return;
+        try {
+            const res = await fetch(`${BASE_API}/api/flashsale/${id}`, { method: 'DELETE' });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.message || 'Gagal menghapus');
+            
+            showToast('✅ Flash sale berhasil dihapus', false);
+            await loadFlashSale();
+            
+            if (editId === id) {
+                editId = null;
+                document.getElementById('product').value = '';
+                document.getElementById('discount').value = '';
+                document.getElementById('duration').value = '';
+                
+                const formTitle = document.querySelector('#flashSaleForm').closest('.card-custom').querySelector('.card-header-custom h2');
+                if (formTitle) {
+                    formTitle.innerHTML = '<i class="bi bi-plus-circle-fill"></i> Buat / Edit Flash Sale';
+                }
+            }
+        } catch (err) {
+            console.error('Error deleteFlashSale:', err);
+            showToast(`❌ Error: ${err.message}`, true);
+        }
+    }
+
+    document.getElementById('resetFormBtn').addEventListener('click', () => {
+        document.getElementById('flashSaleForm').reset();
+        editId = null;
+        document.getElementById('product').value = '';
+        
+        const formTitle = document.querySelector('#flashSaleForm').closest('.card-custom').querySelector('.card-header-custom h2');
+        if (formTitle) {
+            formTitle.innerHTML = '<i class="bi bi-plus-circle-fill"></i> Buat / Edit Flash Sale';
+        }
+        
+        showToast('Form telah direset', false);
+    });
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function init() {
+        await loadProducts();
+        await loadFlashSale();
+        startCountdownInterval();
+    }
+    
+    init();
+</script>
+</body>
+</html>

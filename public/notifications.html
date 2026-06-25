@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Notifikasi - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3A7B70;
+            border-radius: 10px;
+        }
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 130px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 140px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Custom card styling */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            height: 100%;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        
+        .badge-type {
+            font-weight: 500;
+            padding: 0.3rem 0.85rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .badge-promo { background: #FEF3E8; color: #F08A5D; }
+        .badge-order { background: #E8F5F2; color: #3A7B70; }
+        .badge-system { background: #EDF2F7; color: #5A6E6A; }
+        .badge-chat { background: #E8F0FE; color: #4A90E2; }
+        .badge-review { background: #FFF8E8; color: #F5A623; }
+        
+        .preview-card {
+            background: #F9FBFD;
+            border-radius: 1.25rem;
+            border: 1px solid #eef2f8;
+        }
+        .stat-box {
+            border-radius: 1.25rem;
+            transition: all 0.2s;
+        }
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        .action-icons i {
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .action-icons i:hover {
+            transform: scale(1.1);
+        }
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-outline-custom {
+            border-radius: 2rem;
+            border: 1px solid #dee2e6;
+            padding: 0.4rem 1rem;
+            transition: 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+        .filter-select {
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            border: 1px solid #dee2e6;
+            background-color: white;
+        }
+        .page-link-custom {
+            border-radius: 0.5rem !important;
+            margin: 0 0.2rem;
+            color: #3A7B70;
+        }
+        .page-item.active .page-link {
+            background-color: #3A7B70;
+            border-color: #3A7B70;
+        }
+        .alert-slide {
+            animation: slideIn 0.25s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .text-truncate-custom {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        @media (min-width: 1400px) {
+            .text-truncate-custom {
+                max-width: 350px;
+            }
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 105px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .stat-box {
+                padding: 0.9rem !important;
+            }
+            .badge-type {
+                white-space: normal;
+                font-size: 0.65rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 130px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 140px 2.5rem 1.5rem 2.5rem;
+            }
+            .table-custom td {
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-bell-fill"></i> Kelola Notifikasi
+        </h1>
+        <p class="mb-0 opacity-75 small">Kirim promo, update pesanan, atau info sistem ke pengguna</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Alert Container -->
+    <div id="alertContainer"></div>
+
+    <!-- Grid 2 kolom: form kiri & statistik kanan -->
+    <div class="row g-4 mb-4">
+        <!-- Kolom Kiri: Form Kirim -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card card-custom">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-megaphone-fill me-2 text-success"></i> Kirim Notifikasi Baru</h5>
+                        <span class="badge bg-light text-dark rounded-pill px-3 py-2" id="totalUserCount">0 User</span>
+                    </div>
+                    <form id="notificationForm">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="bi bi-chat-left-text"></i> Judul Notifikasi</label>
+                            <input type="text" class="form-control rounded-3" id="notifTitle" placeholder="Contoh: FLASH SALE 50%!" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="bi bi-envelope-paper"></i> Pesan Notifikasi</label>
+                            <textarea class="form-control rounded-3" id="notifMessage" rows="3" placeholder="Tulis pesan lengkap..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="bi bi-tags"></i> Tipe Notifikasi</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="notifType" value="promo" checked id="typePromo">
+                                    <label class="form-check-label" for="typePromo">🎉 Promo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="notifType" value="order" id="typeOrder">
+                                    <label class="form-check-label" for="typeOrder">📦 Pesanan</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="notifType" value="system" id="typeSystem">
+                                    <label class="form-check-label" for="typeSystem">⚙️ Sistem</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="notifType" value="chat" id="typeChat">
+                                    <label class="form-check-label" for="typeChat">💬 Chat</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="notifType" value="review" id="typeReview">
+                                    <label class="form-check-label" for="typeReview">⭐ Review</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="bi bi-image"></i> URL Gambar (Opsional)</label>
+                            <input type="url" class="form-control rounded-3" id="imageUrl" placeholder="https://example.com/gambar.jpg">
+                            <div class="form-text">Kosongkan jika tidak perlu</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold"><i class="bi bi-people"></i> Target Pengguna</label>
+                            <div class="d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="targetType" value="all" checked id="targetAll">
+                                    <label class="form-check-label" for="targetAll">Semua User</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="targetType" value="specific" id="targetSpecific">
+                                    <label class="form-check-label" for="targetSpecific">User Tertentu (Email)</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3" id="specificEmailGroup" style="display: none;">
+                            <label class="form-label fw-semibold"><i class="bi bi-envelope"></i> Email User Target</label>
+                            <input type="email" class="form-control rounded-3" id="targetEmail" placeholder="contoh: user@email.com">
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom text-white w-100 py-2" id="sendBtn">
+                            <i class="bi bi-send-fill me-1"></i> Kirim Notifikasi
+                        </button>
+                    </form>
+
+                    <!-- Preview Section -->
+                    <div class="preview-card mt-4 p-3">
+                        <p class="small text-uppercase text-secondary fw-semibold mb-2"><i class="bi bi-eye"></i> Live Preview</p>
+                        <div class="d-flex gap-3" id="previewCard">
+                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <span id="previewIcon" style="font-size: 1.8rem;">🎉</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1" id="previewTitle">Judul Notifikasi</h6>
+                                <p class="small text-secondary mb-1" id="previewMessage">Pesan notifikasi akan muncul di sini...</p>
+                                <span class="small text-muted"><i class="bi bi-clock"></i> Baru saja</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kolom Kanan: Statistik -->
+        <div class="col-xl-6 col-lg-12">
+            <div class="card card-custom">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h5 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-steps"></i> Statistik Notifikasi</h5>
+                        <button class="btn btn-outline-custom btn-sm" id="refreshStatsBtn"><i class="bi bi-arrow-repeat"></i> Refresh</button>
+                    </div>
+                    <div id="statsContent">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-secondary spinner-border-sm-custom" role="status"></div>
+                            <p class="mt-2 small text-muted">Memuat statistik...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Riwayat Notifikasi -->
+    <div class="card card-custom">
+        <div class="card-body p-0 p-md-3">
+            <div class="p-3 pb-0 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history"></i> Riwayat Notifikasi</h5>
+                <div class="d-flex gap-2">
+                    <select id="filterType" class="filter-select form-select form-select-sm w-auto">
+                        <option value="all">Semua Tipe</option>
+                        <option value="promo">Promo</option>
+                        <option value="order">Pesanan</option>
+                        <option value="system">Sistem</option>
+                        <option value="chat">Chat</option>
+                        <option value="review">Review</option>
+                    </select>
+                    <button class="btn btn-outline-custom btn-sm" id="refreshHistoryBtn"><i class="bi bi-arrow-repeat"></i></button>
+                </div>
+            </div>
+            <div class="table-responsive-custom p-3 pt-2">
+                <table class="table table-hover align-middle table-custom mb-0" style="min-width: 800px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th style="width: 20%;">Judul</th>
+                            <th style="width: 25%;">Pesan</th>
+                            <th style="width: 12%;">Tipe</th>
+                            <th style="width: 12%;">Target</th>
+                            <th style="width: 10%;">Dibaca</th>
+                            <th style="width: 12%;">Waktu</th>
+                            <th style="width: 4%;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody">
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="spinner-border text-secondary spinner-border-sm-custom" role="status"></div>
+                                <p class="mt-2 small text-muted">Memuat riwayat...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div id="pagination" class="d-flex justify-content-center mt-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 pb-3">
+        <p class="small text-secondary m-0">© 2026 Mabruk Geutanyoe Hijab Store — Notifikasi terintegrasi push notification (FCM)</p>
+    </div>
+</div>
+
+<script>
+    // ==================== KONFIGURASI ====================
+    const API_BASE = ''; // kosongkan untuk relative
+    let currentPage = 1;
+    let totalPages = 1;
+
+    // Helper show alert dengan bootstrap style
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alertContainer');
+        const alertDiv = document.createElement('div');
+        const bgClass = type === 'success' ? 'bg-success-subtle text-success border-success' : (type === 'error' ? 'bg-danger-subtle text-danger border-danger' : 'bg-info-subtle text-info border-info');
+        alertDiv.className = `alert alert-slide d-flex align-items-center justify-content-between ${bgClass} border rounded-3 p-2 px-3 mb-2`;
+        alertDiv.innerHTML = `
+            <div class="d-flex gap-2 align-items-center">
+                <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : (type === 'error' ? 'bi-exclamation-triangle-fill' : 'bi-info-circle-fill')}"></i>
+                <span class="small fw-medium">${message}</span>
+            </div>
+            <button type="button" class="btn-close btn-sm" onclick="this.parentElement.remove()"></button>
+        `;
+        alertContainer.appendChild(alertDiv);
+        setTimeout(() => alertDiv.remove(), 5000);
+    }
+
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = now - date;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        if (minutes < 1) return 'Baru saja';
+        if (minutes < 60) return `${minutes} menit lalu`;
+        if (hours < 24) return `${hours} jam lalu`;
+        if (days === 1) return 'Kemarin';
+        return date.toLocaleDateString('id-ID');
+    }
+
+    function getBadgeClass(type) {
+        const map = { promo: 'badge-promo', order: 'badge-order', system: 'badge-system', chat: 'badge-chat', review: 'badge-review' };
+        return map[type] || 'badge-system';
+    }
+    function getTypeIcon(type) {
+        const icons = { promo: '🎉', order: '📦', system: '⚙️', chat: '💬', review: '⭐' };
+        return icons[type] || '🔔';
+    }
+
+    // load statistik
+    async function loadStatistics() {
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/notifications/stats`);
+            const stats = await response.json();
+            const statsHtml = `
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stat-box bg-success bg-opacity-10 p-3 text-center">
+                            <i class="bi bi-envelope-paper fs-2 text-success"></i>
+                            <h2 class="fw-bold text-success mb-0">${stats.totalSent || 0}</h2>
+                            <p class="small text-secondary mb-0">Total Terkirim</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box bg-warning bg-opacity-10 p-3 text-center">
+                            <i class="bi bi-eye fs-2 text-warning"></i>
+                            <h2 class="fw-bold text-warning mb-0">${stats.totalRead || 0}</h2>
+                            <p class="small text-secondary mb-0">Telah Dibaca</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box bg-primary bg-opacity-10 p-3 text-center">
+                            <i class="bi bi-tags fs-2 text-primary"></i>
+                            <div><span class="fw-bold">Promo:</span> ${stats.byType?.promo || 0}</div>
+                            <div><span class="fw-bold">Pesanan:</span> ${stats.byType?.order || 0}</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-box bg-info bg-opacity-10 p-3 text-center">
+                            <i class="bi bi-calendar-week fs-2 text-info"></i>
+                            <div><span class="fw-bold">Bulan Ini:</span> ${stats.thisMonth || 0}</div>
+                            <div><span class="fw-bold">Minggu Ini:</span> ${stats.thisWeek || 0}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('statsContent').innerHTML = statsHtml;
+            if (stats.totalUsers) document.getElementById('totalUserCount').innerText = `${stats.totalUsers} User`;
+        } catch (error) {
+            document.getElementById('statsContent').innerHTML = '<div class="alert alert-warning small">Gagal memuat statistik</div>';
+        }
+    }
+
+    async function loadNotificationHistory(page = 1) {
+        const filterType = document.getElementById('filterType').value;
+        currentPage = page;
+        try {
+            const response = await fetch(`${API_BASE}/api/admin/notifications/history?page=${page}&limit=20&type=${filterType}`);
+            const result = await response.json();
+            const tbody = document.getElementById('historyTableBody');
+            if (!result.data || result.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox"></i> Belum ada riwayat notifikasi</td></tr>';
+                return;
+            }
+            tbody.innerHTML = result.data.map((notif, idx) => `
+                <tr>
+                    <td>${(page-1)*20 + idx+1}</td>
+                    <td class="fw-semibold">${escapeHtml(notif.title)}</td>
+                    <td><div class="text-truncate-custom" title="${escapeHtml(notif.message)}">${escapeHtml(notif.message.substring(0, 80))}${notif.message.length>80?'...':''}</div></td>
+                    <td><span class="badge-type ${getBadgeClass(notif.type)}">${getTypeIcon(notif.type)} ${notif.type.toUpperCase()}</span></td>
+                    <td>${notif.target_count || 'Semua'}</td>
+                    <td>${notif.read_count || 0}/${notif.target_count || 0}</td>
+                    <td class="text-nowrap small">${formatDate(notif.created_at)}</td>
+                    <td><div class="action-icons"><i class="bi bi-trash3 text-danger delete-icon" onclick="deleteNotification(${notif.id})" style="cursor:pointer;"></i></div></td>
+                </tr>
+            `).join('');
+            totalPages = result.totalPages || 1;
+            renderPagination();
+        } catch (error) {
+            document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger">Gagal memuat riwayat</td></tr>';
+        }
+    }
+
+    function renderPagination() {
+        const paginationDiv = document.getElementById('pagination');
+        if (totalPages <= 1) { paginationDiv.innerHTML = ''; return; }
+        let ul = '<ul class="pagination pagination-sm">';
+        for (let i = 1; i <= Math.min(totalPages, 8); i++) {
+            ul += `<li class="page-item ${i === currentPage ? 'active' : ''}"><button class="page-link page-link-custom" onclick="loadNotificationHistory(${i})">${i}</button></li>`;
+        }
+        ul += '</ul>';
+        paginationDiv.innerHTML = ul;
+    }
+
+    window.deleteNotification = async function(id) {
+        if (!confirm('Yakin ingin menghapus notifikasi ini?')) return;
+        try {
+            const res = await fetch(`${API_BASE}/api/admin/notifications/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+                showAlert('Notifikasi dihapus', 'success');
+                loadNotificationHistory(currentPage);
+                loadStatistics();
+            } else showAlert('Gagal hapus', 'error');
+        } catch(e) { showAlert('Error: '+e.message, 'error'); }
+    };
+
+    async function sendNotification(title, message, type, imageUrl, targetType, targetEmail) {
+        const sendBtn = document.getElementById('sendBtn');
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
+        try {
+            let url = `${API_BASE}/api/admin/send-notification`;
+            let body = { title, message, type, image_url: imageUrl || null };
+            if (targetType === 'specific' && targetEmail) {
+                url = `${API_BASE}/api/admin/send-notification-to-user`;
+                body.email = targetEmail;
+            }
+            const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+            const result = await response.json();
+            if (response.ok) {
+                showAlert(result.message || 'Notifikasi terkirim!', 'success');
+                document.getElementById('notificationForm').reset();
+                document.getElementById('imageUrl').value = '';
+                loadNotificationHistory(1);
+                loadStatistics();
+                updatePreview();
+            } else showAlert(result.message || 'Gagal kirim', 'error');
+        } catch (err) { showAlert('Error: '+err.message, 'error'); }
+        finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<i class="bi bi-send-fill me-1"></i> Kirim Notifikasi';
+        }
+    }
+
+    function updatePreview() {
+        const title = document.getElementById('notifTitle').value || 'Judul Notifikasi';
+        const msg = document.getElementById('notifMessage').value || 'Pesan notifikasi...';
+        const type = document.querySelector('input[name="notifType"]:checked').value;
+        document.getElementById('previewTitle').innerText = title;
+        document.getElementById('previewMessage').innerText = msg;
+        document.getElementById('previewIcon').innerHTML = getTypeIcon(type);
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function setupEventListeners() {
+        document.getElementById('notificationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = document.getElementById('notifTitle').value;
+            const message = document.getElementById('notifMessage').value;
+            const type = document.querySelector('input[name="notifType"]:checked').value;
+            const imageUrl = document.getElementById('imageUrl').value;
+            const targetType = document.querySelector('input[name="targetType"]:checked').value;
+            const targetEmail = document.getElementById('targetEmail').value;
+            if (!title || !message) return showAlert('Judul & pesan harus diisi', 'error');
+            if (targetType === 'specific' && !targetEmail) return showAlert('Masukkan email target', 'error');
+            sendNotification(title, message, type, imageUrl, targetType, targetEmail);
+        });
+        const targetAll = document.querySelector('input[name="targetType"][value="all"]');
+        const targetSpecific = document.querySelector('input[name="targetType"][value="specific"]');
+        const specificGroup = document.getElementById('specificEmailGroup');
+        targetAll.addEventListener('change', () => specificGroup.style.display = 'none');
+        targetSpecific.addEventListener('change', () => specificGroup.style.display = 'block');
+        document.getElementById('notifTitle').addEventListener('input', updatePreview);
+        document.getElementById('notifMessage').addEventListener('input', updatePreview);
+        document.querySelectorAll('input[name="notifType"]').forEach(radio => radio.addEventListener('change', updatePreview));
+        document.getElementById('refreshStatsBtn').addEventListener('click', loadStatistics);
+        document.getElementById('refreshHistoryBtn').addEventListener('click', () => loadNotificationHistory(1));
+        document.getElementById('filterType').addEventListener('change', () => loadNotificationHistory(1));
+    }
+
+    async function init() {
+        setupEventListeners();
+        await loadStatistics();
+        await loadNotificationHistory(1);
+        updatePreview();
+    }
+    init();
+</script>
+</body>
+</html>

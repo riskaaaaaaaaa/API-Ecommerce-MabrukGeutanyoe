@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Admin Banner - Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 110px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 120px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        .card-custom .card-header-custom {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .card-custom .card-header-custom h2 {
+            color: #2C3E3B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-custom .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Form styling - SAMA dengan halaman lain */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        input[type="file"].form-control-custom {
+            padding: 0.5rem 1rem;
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-delete-custom {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-delete-custom:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Banner card styling */
+        .banner-item {
+            transition: all 0.2s;
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eef2f8;
+            height: 100%;
+        }
+        .banner-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+        .banner-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            background-color: #D4E8E4;
+        }
+        .banner-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            color: #2C3E3B;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6B7C7A;
+        }
+        
+        /* Badge count */
+        .badge-count {
+            background: #3A7B70;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Alert styling */
+        .alert-custom {
+            border-radius: 1rem;
+            border: none;
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 90px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .banner-img {
+                height: 140px;
+            }
+            .banner-title {
+                font-size: 0.85rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 110px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 120px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-images"></i> Admin Banner
+        </h1>
+        <p class="mb-0 opacity-75 small">Kelola banner promosi toko</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='../index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Form Upload Banner -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h2><i class="bi bi-cloud-upload-fill"></i> Upload Banner Baru</h2>
+        </div>
+        <div class="card-body-custom">
+            <form id="bannerForm" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label-custom"><i class="bi bi-tag"></i> Judul Banner</label>
+                    <input type="text" name="title" class="form-control-custom" placeholder="Masukkan judul banner" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label-custom"><i class="bi bi-image"></i> Gambar Banner</label>
+                    <input type="file" name="image" class="form-control-custom" accept="image/*" required>
+                    <div class="form-text text-muted small mt-1">Format gambar: JPG, PNG, WEBP (ukuran maksimal sesuai server)</div>
+                </div>
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="bi bi-send-fill me-1"></i> Upload Banner
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Daftar Banner -->
+    <div class="card-custom">
+        <div class="card-header-custom d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h2><i class="bi bi-grid-3x3-gap-fill"></i> Daftar Banner</h2>
+            <span class="badge-count" id="bannerCount">0</span>
+        </div>
+        <div class="card-body-custom">
+            <div id="bannerList" class="row g-4">
+                <div class="col-12 text-center py-5">
+                    <div class="spinner-border text-secondary" role="status"></div>
+                    <p class="mt-2 small text-muted">Memuat banner...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const BASE_URL = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+
+    const form = document.getElementById('bannerForm');
+    const bannerListDiv = document.getElementById('bannerList');
+    const bannerCountSpan = document.getElementById('bannerCount');
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    async function loadBanner() {
+        try {
+            const response = await fetch(`${BASE_URL}/api/banner`);
+            if (!response.ok) throw new Error('Gagal memuat banner');
+            const banners = await response.json();
+            
+            bannerCountSpan.innerText = banners.length;
+
+            if (banners.length === 0) {
+                bannerListDiv.innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-state">
+                            <i class="bi bi-image fs-1 text-secondary opacity-50"></i>
+                            <p class="mt-2 text-secondary mb-0">Belum ada banner. Silakan upload banner pertama.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            banners.forEach(item => {
+                const safeTitle = escapeHtml(item.title);
+                const imageUrl = item.image;
+                html += `
+                    <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="banner-item h-100 d-flex flex-column">
+                            <img src="${imageUrl}" alt="${safeTitle}" class="banner-img" onerror="this.src='https://placehold.co/600x400?text=Error+Load'">
+                            <div class="p-3 d-flex flex-column flex-grow-1">
+                                <div class="banner-title flex-grow-1">${safeTitle}</div>
+                                <button class="btn-delete-custom mt-2" onclick="deleteBanner(${item.id})">
+                                    <i class="bi bi-trash3 me-1"></i> Hapus Banner
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            bannerListDiv.innerHTML = html;
+        } catch (err) {
+            console.error(err);
+            bannerListDiv.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger alert-custom text-center">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> Gagal memuat banner: ${err.message}
+                    </div>
+                </div>
+            `;
+            bannerCountSpan.innerText = '0';
+        }
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Mengirim...';
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/banner`, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message || 'Upload gagal');
+            
+            alert(result.message || 'Banner berhasil diupload!');
+            form.reset();
+            loadBanner();
+        } catch (err) {
+            alert('Upload gagal: ' + err.message);
+            console.error(err);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    });
+
+    window.deleteBanner = async function(id) {
+        if (!confirm('Yakin ingin menghapus banner ini? Tindakan ini permanen.')) return;
+        try {
+            const response = await fetch(`${BASE_URL}/api/banner/${id}`, {
+                method: 'DELETE'
+            });
+            if (!response.ok) throw new Error('Gagal menghapus banner');
+            const result = await response.json();
+            alert(result.message || 'Banner berhasil dihapus');
+            loadBanner();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    };
+
+    loadBanner();
+</script>
+</body>
+</html>

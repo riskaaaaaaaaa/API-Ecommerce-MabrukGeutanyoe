@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Favorit - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 130px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 140px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        .card-custom .card-header-custom {
+            background: white;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #eef2f8;
+        }
+        .card-custom .card-header-custom h2 {
+            color: #2C3E3B;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-custom .card-body-custom {
+            padding: 1.5rem;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Form styling - SAMA dengan halaman lain */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        select.form-control-custom {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233A7B70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid #3A7B70;
+            color: #3A7B70;
+            border-radius: 2rem;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: rgba(58, 123, 112, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        /* Kartu produk favorit */
+        .favorite-card {
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eef2f8;
+            background: white;
+            transition: transform 0.2s, box-shadow 0.2s;
+            height: 100%;
+        }
+        .favorite-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+        .card-img-top {
+            height: 180px;
+            object-fit: cover;
+            background-color: #D4E8E4;
+        }
+        .product-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: #1a2c29;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .price-current {
+            color: #3A7B70;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        .price-old {
+            font-size: 0.7rem;
+            text-decoration: line-through;
+            color: #6B7C7A;
+            margin-left: 0.5rem;
+        }
+        .rating {
+            font-size: 0.75rem;
+            color: #F08A5D;
+            margin-top: 0.5rem;
+        }
+        .btn-remove-fav {
+            background: #FEF3E8;
+            color: #F08A5D;
+            border: 1px solid #F08A5D;
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-remove-fav:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6B7C7A;
+        }
+        
+        /* Toast - SAMA dengan halaman lain */
+        .toast-custom {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2C3E3B;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1200;
+            font-size: 0.85rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 105px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .card-img-top {
+                height: 140px;
+            }
+            .product-title {
+                font-size: 0.85rem;
+            }
+            .price-current {
+                font-size: 0.9rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 130px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 140px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-heart-fill"></i> Kelola Favorit
+        </h1>
+        <p class="mb-0 opacity-75 small">Atur produk favorit pelanggan</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Kartu pilih user -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h2><i class="bi bi-person-badge"></i> Pilih User</h2>
+        </div>
+        <div class="card-body-custom">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label-custom"><i class="bi bi-people"></i> Daftar Pengguna</label>
+                    <select id="userSelect" class="form-control-custom">
+                        <option value="">-- Memuat user --</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button id="loadBtn" class="btn btn-primary-custom w-100">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Muat Favorit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kartu tambah favorit -->
+    <div class="card-custom">
+        <div class="card-header-custom">
+            <h2><i class="bi bi-plus-circle-fill"></i> Tambah Favorit Baru</h2>
+        </div>
+        <div class="card-body-custom">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label class="form-label-custom"><i class="bi bi-box-seam"></i> Pilih Produk</label>
+                    <select id="productSelect" class="form-control-custom">
+                        <option value="">-- Memuat produk --</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button id="addBtn" class="btn btn-outline-custom w-100">
+                        <i class="bi bi-heart-plus me-1"></i> Tambah Favorit
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daftar favorit (grid) -->
+    <div class="mt-3">
+        <div id="favoritesContainer" class="row g-4">
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="bi bi-heart fs-1 text-secondary"></i>
+                    <p class="mt-2 text-secondary">Pilih user dan klik "Muat Favorit"</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast notifikasi -->
+<div id="toastMessage" class="toast-custom"></div>
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    const BASE_API = (typeof API_BASE !== 'undefined') ? API_BASE : '';
+    const FAVORITES_API = `${BASE_API}/api/favorites`;
+    const USERS_API = `${BASE_API}/api/users`;
+    const PRODUCTS_API = `${BASE_API}/api/products`;
+    let currentUserId = null;
+
+    // ================= TOAST =================
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toastMessage');
+        toast.textContent = msg;
+        toast.style.backgroundColor = isError ? '#F08A5D' : '#2C3E3B';
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2500);
+    }
+
+    // ================= LOAD USERS =================
+    async function loadUsers() {
+        const select = document.getElementById('userSelect');
+        try {
+            const res = await fetch(USERS_API);
+            if (!res.ok) throw new Error('Gagal memuat user');
+            const users = await res.json();
+            select.innerHTML = '<option value="">-- Pilih User --</option>';
+            users.forEach(user => {
+                if (!user.uid) return;
+                const option = document.createElement('option');
+                option.value = user.uid;
+                const shortUid = user.uid.length > 12 ? user.uid.substring(0, 12) + '…' : user.uid;
+                option.textContent = `${user.name} (${user.email}) [UID: ${shortUid}]`;
+                select.appendChild(option);
+            });
+        } catch (err) {
+            showToast(err.message, true);
+            select.innerHTML = '<option value="">Gagal memuat user</option>';
+        }
+    }
+
+    // ================= LOAD PRODUCTS =================
+    async function loadProducts() {
+        const select = document.getElementById('productSelect');
+        try {
+            const res = await fetch(PRODUCTS_API);
+            if (!res.ok) throw new Error('Gagal memuat produk');
+            const products = await res.json();
+            select.innerHTML = '<option value="">-- Pilih Produk --</option>';
+            products.forEach(prod => {
+                const option = document.createElement('option');
+                option.value = prod.id;
+                const priceFormatted = formatRupiah(prod.price);
+                option.textContent = `${prod.name} (${priceFormatted})`;
+                select.appendChild(option);
+            });
+        } catch (err) {
+            showToast(err.message, true);
+            select.innerHTML = '<option value="">Gagal memuat produk</option>';
+        }
+    }
+
+    // ================= FETCH FAVORITES =================
+    async function fetchFavorites(userId) {
+        const container = document.getElementById('favoritesContainer');
+        container.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-secondary" role="status"></div>
+                <p class="mt-2 small text-muted">Memuat favorit...</p>
+            </div>
+        `;
+        try {
+            const res = await fetch(`${FAVORITES_API}?userId=${userId}`);
+            if (!res.ok) {
+                const errData = await res.json();
+                throw new Error(errData.error || 'Gagal memuat');
+            }
+            const favorites = await res.json();
+            renderFavorites(favorites);
+        } catch (err) {
+            container.innerHTML = `<div class="col-12"><div class="empty-state"><i class="bi bi-exclamation-triangle-fill text-danger fs-1"></i><p class="mt-2">❌ ${err.message}</p></div></div>`;
+            showToast(err.message, true);
+        }
+    }
+
+    // ================= ADD FAVORITE =================
+    async function addFavorite(userId, productId) {
+        if (!userId || !productId) {
+            showToast('Pilih user dan produk terlebih dahulu', true);
+            return;
+        }
+        try {
+            const res = await fetch(FAVORITES_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, productId })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Gagal menambah');
+            showToast(`✅ Produk berhasil ditambahkan ke favorit`);
+            fetchFavorites(userId);
+        } catch (err) {
+            showToast(err.message, true);
+        }
+    }
+
+    // ================= REMOVE FAVORITE =================
+    async function removeFavorite(userId, productId, productName) {
+        if (!confirm(`Hapus "${productName}" dari favorit?`)) return;
+        try {
+            const res = await fetch(`${FAVORITES_API}/${productId}?userId=${userId}`, { method: 'DELETE' });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Gagal menghapus');
+            showToast(`🗑️ ${productName} dihapus dari favorit`);
+            fetchFavorites(userId);
+        } catch (err) {
+            showToast(err.message, true);
+        }
+    }
+
+    // ================= RENDER FAVORITES (GRID BS) =================
+    function renderFavorites(favorites) {
+        const container = document.getElementById('favoritesContainer');
+        if (!favorites.length) {
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="bi bi-emoji-neutral fs-1 text-secondary"></i>
+                        <p class="mt-2 text-secondary">✨ Belum ada produk favorit untuk user ini</p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        favorites.forEach(prod => {
+            let imageUrl = prod.imageUrl;
+            if (!imageUrl) {
+                imageUrl = 'https://placehold.co/400x400?text=No+Image';
+            } else if (!imageUrl.startsWith('http')) {
+                imageUrl = `${BASE_API}/uploads/product_details/${imageUrl}`;
+            }
+            
+            const safeName = escapeHtml(prod.name);
+            const priceCurrent = formatRupiah(prod.price);
+            const priceOld = prod.oldPrice ? formatRupiah(prod.oldPrice) : '';
+            const rating = prod.rating || 0;
+            const sold = prod.sold || 0;
+            
+            html += `
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="favorite-card h-100 d-flex flex-column">
+                        <img src="${imageUrl}" 
+                             class="card-img-top" 
+                             onerror="this.onerror=null; this.src='https://placehold.co/400x400?text=No+Image'">
+                        <div class="p-3 d-flex flex-column flex-grow-1">
+                            <div class="product-title">${safeName}</div>
+                            <div>
+                                <span class="price-current">${priceCurrent}</span>
+                                ${priceOld ? `<span class="price-old">${priceOld}</span>` : ''}
+                            </div>
+                            <div class="rating">⭐ ${rating} | Terjual ${sold}</div>
+                            <button class="btn-remove-fav mt-3" data-product-id="${prod.id}" data-product-name="${safeName.replace(/'/g, "\\'")}">
+                                <i class="bi bi-heartbreak me-1"></i> Hapus
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+
+        // Event listener untuk tombol hapus
+        document.querySelectorAll('.btn-remove-fav').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const productId = btn.getAttribute('data-product-id');
+                const productName = btn.getAttribute('data-product-name');
+                if (currentUserId) {
+                    removeFavorite(currentUserId, productId, productName);
+                }
+            });
+        });
+    }
+
+    // ================= HELPER =================
+    function formatRupiah(number) {
+        if (number === undefined || number === null) return 'Rp 0';
+        return 'Rp ' + parseInt(number).toLocaleString('id-ID');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ================= EVENT LISTENERS =================
+    document.getElementById('loadBtn').addEventListener('click', () => {
+        const selected = document.getElementById('userSelect').value;
+        if (!selected) {
+            showToast('Pilih user terlebih dahulu', true);
+            return;
+        }
+        currentUserId = selected;
+        fetchFavorites(currentUserId);
+    });
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        const userId = document.getElementById('userSelect').value;
+        const productId = document.getElementById('productSelect').value;
+        if (!userId || !productId) {
+            showToast('Pilih user dan produk terlebih dahulu', true);
+            return;
+        }
+        currentUserId = userId;
+        await addFavorite(userId, productId);
+    });
+
+    // ================= INIT =================
+    loadUsers();
+    loadProducts();
+</script>
+</body>
+</html>

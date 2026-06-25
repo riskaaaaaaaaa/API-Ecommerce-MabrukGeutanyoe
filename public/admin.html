@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Manajemen Akun - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 110px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 120px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-edit-custom {
+            background: #3A7B70;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.25rem 0.9rem;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-edit-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-delete-custom {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.25rem 0.9rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-delete-custom:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Table styling - SAMA dengan halaman lain */
+        .table-custom th {
+            background: #F8FAFE;
+            font-weight: 600;
+            color: #2C3E3B;
+            border-bottom-width: 1px;
+            white-space: nowrap;
+            padding: 0.75rem 1rem;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d4a44;
+            padding: 0.75rem 1rem;
+        }
+        .table-responsive-custom {
+            overflow-x: auto;
+            width: 100%;
+        }
+        
+        /* Badge & status */
+        .badge-count {
+            background: #3A7B70;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        /* Modal styling - SAMA dengan halaman lain */
+        .modal-custom .modal-content {
+            border-radius: 1.25rem;
+            border: none;
+        }
+        .modal-custom .modal-header {
+            border-bottom: 1px solid #eef2f8;
+            padding: 1.25rem 1.5rem;
+        }
+        .modal-custom .modal-footer {
+            border-top: 1px solid #eef2f8;
+            padding: 1rem 1.5rem;
+        }
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        .alert-custom {
+            border-radius: 1rem;
+            border: none;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 90px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .table-custom th, .table-custom td {
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 110px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 120px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-person-badge"></i> Manajemen Akun
+        </h1>
+        <p class="mb-0 opacity-75 small">Kelola akun pengguna aplikasi</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Card Utama -->
+    <div class="card-custom">
+        <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+                <button class="btn btn-primary-custom" id="btnAddUser">
+                    <i class="bi bi-person-plus-fill me-1"></i> Tambah User Baru
+                </button>
+                <div class="text-muted small">
+                    <i class="bi bi-database"></i> Data akun pelanggan
+                </div>
+            </div>
+
+            <!-- Tempat pesan error / loading -->
+            <div id="statusMessage" style="display: none;" class="alert alert-custom alert-danger mb-3"></div>
+
+            <div class="table-responsive-custom">
+                <div id="userTableContainer">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-secondary" role="status"></div>
+                        <p class="mt-2 small text-muted">Memuat data pengguna...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL BOOTSTRAP (tambah/edit) -->
+<div class="modal fade modal-custom" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-dark" id="modalTitle">Tambah User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label-custom">Nama Lengkap <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control-custom" id="modalName" placeholder="Masukkan nama lengkap">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-custom">Email <span class="text-danger">*</span></label>
+                    <input type="email" class="form-control-custom" id="modalEmail" placeholder="Email aktif">
+                    <div class="form-text text-muted small">Email akan digunakan sebagai ID unik.</div>
+                </div>
+                <div class="mb-2" id="passwordGroup">
+                    <label class="form-label-custom">Password</label>
+                    <input type="password" class="form-control-custom" id="modalPassword" placeholder="Minimal 6 karakter">
+                    <div class="form-text text-muted small" id="passwordHelper">Kosongkan jika tidak ingin mengubah password (saat edit).</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-primary-custom px-4" id="modalSave">Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    if (typeof BASE_API === 'undefined') {
+        console.warn("config.js tidak ditemukan, gunakan base url relatif '/'");
+        var BASE_API = '';
+    }
+
+    let currentEditEmail = null;
+    let bsModal = null;
+
+    async function fetchAPI(endpoint, options = {}) {
+        const url = `${BASE_API}${endpoint}`;
+        const response = await fetch(url, {
+            ...options,
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json', ...options.headers }
+        });
+        if (!response.ok) {
+            let errorMsg = `Request gagal (${response.status})`;
+            try {
+                const errData = await response.json();
+                errorMsg = errData.message || errorMsg;
+            } catch(e) {}
+            throw new Error(errorMsg);
+        }
+        return response.json();
+    }
+
+    async function autoLoginAdmin() {
+        try {
+            const defaultEmail = "admin@rabbani.com";
+            const defaultPassword = "admin123";
+            const res = await fetch(`${BASE_API}/api/admin/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email: defaultEmail, password: defaultPassword })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Login otomatis gagal');
+            console.log("Auto login admin sukses");
+            return true;
+        } catch (err) {
+            console.error("Auto login error:", err);
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-2"></i> Gagal melakukan auto-login: ${err.message}. Periksa koneksi backend.`;
+            statusDiv.style.display = 'block';
+            return false;
+        }
+    }
+
+    async function loadUsers() {
+        const container = document.getElementById('userTableContainer');
+        try {
+            const users = await fetchAPI('/api/admin/users');
+            if (!Array.isArray(users)) throw new Error('Format data tidak valid');
+            
+            if (users.length === 0) {
+                container.innerHTML = `<div class="alert alert-info text-center rounded-3">Belum ada user terdaftar. Klik "Tambah User Baru" untuk menambahkan.</div>`;
+                return;
+            }
+            
+            let html = `
+                <table class="table table-hover align-middle table-custom w-100">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Nama Lengkap</th>
+                            <th>UID</th>
+                            <th>Dibuat</th>
+                            <th class="text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            for (let u of users) {
+                let createdText = '-';
+                if (u.createdAt) {
+                    if (u.createdAt._seconds) {
+                        createdText = new Date(u.createdAt._seconds * 1000).toLocaleString('id-ID');
+                    } else if (u.createdAt instanceof Date || typeof u.createdAt === 'string') {
+                        createdText = new Date(u.createdAt).toLocaleString('id-ID');
+                    }
+                }
+                const uidShort = u.uid ? u.uid.substring(0, 10) : '-';
+                const safeName = escapeHtml(u.name);
+                const safeEmail = escapeHtml(u.email);
+                html += `
+                    <tr>
+                        <td class="fw-medium">${safeEmail}</td>
+                        <td>${safeName}</td>
+                        <td><code class="small">${uidShort}${u.uid && u.uid.length > 10 ? '…' : ''}</code></td>
+                        <td class="small text-muted">${createdText}</td>
+                        <td class="text-center">
+                            <button class="btn-edit-custom me-1 mb-1 mb-sm-0" data-email="${safeEmail}" data-name="${safeName.replace(/"/g, '&quot;')}">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </button>
+                            <button class="btn-delete-custom" data-email="${safeEmail}">
+                                <i class="bi bi-trash3"></i> Hapus
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+            html += `</tbody>点able`;
+            container.innerHTML = html;
+            
+            document.querySelectorAll('.btn-edit-custom').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const email = btn.getAttribute('data-email');
+                    const name = btn.getAttribute('data-name');
+                    openEditModal(email, name);
+                });
+            });
+            document.querySelectorAll('.btn-delete-custom').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const email = btn.getAttribute('data-email');
+                    deleteUser(email);
+                });
+            });
+        } catch (err) {
+            console.error(err);
+            container.innerHTML = `<div class="alert alert-danger rounded-3"><i class="bi bi-x-octagon-fill me-2"></i> Gagal memuat data: ${err.message}. Pastikan backend berjalan dan session admin aktif.</div>`;
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function openEditModal(email, name) {
+        currentEditEmail = email;
+        document.getElementById('modalTitle').innerText = 'Edit User';
+        document.getElementById('modalName').value = name;
+        document.getElementById('modalEmail').value = email;
+        document.getElementById('modalEmail').disabled = true;
+        document.getElementById('modalPassword').value = '';
+        document.getElementById('passwordGroup').style.display = 'block';
+        document.getElementById('passwordHelper').innerHTML = 'Kosongkan jika tidak ingin mengubah password.';
+        if (bsModal) bsModal.show();
+    }
+    
+    function resetModalForAdd() {
+        currentEditEmail = null;
+        document.getElementById('modalTitle').innerText = 'Tambah User Baru';
+        document.getElementById('modalName').value = '';
+        document.getElementById('modalEmail').value = '';
+        document.getElementById('modalEmail').disabled = false;
+        document.getElementById('modalPassword').value = '';
+        document.getElementById('passwordGroup').style.display = 'block';
+        document.getElementById('passwordHelper').innerHTML = 'Minimal 6 karakter untuk user baru.';
+    }
+    
+    document.getElementById('btnAddUser')?.addEventListener('click', () => {
+        resetModalForAdd();
+        if (bsModal) bsModal.show();
+    });
+    
+    document.getElementById('modalSave')?.addEventListener('click', async () => {
+        const name = document.getElementById('modalName').value.trim();
+        const email = document.getElementById('modalEmail').value.trim();
+        const password = document.getElementById('modalPassword').value;
+        
+        if (!name || !email) {
+            alert('Nama dan email wajib diisi!');
+            return;
+        }
+        if (!email.includes('@') || !email.includes('.')) {
+            alert('Masukkan email yang valid.');
+            return;
+        }
+        
+        try {
+            if (currentEditEmail === null) {
+                if (!password || password.length < 6) {
+                    alert('Password minimal 6 karakter untuk user baru.');
+                    return;
+                }
+                await fetchAPI('/api/admin/users', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, email, password })
+                });
+                alert('✅ User berhasil ditambahkan!');
+            } else {
+                const updatePayload = { name };
+                if (password && password.length >= 6) {
+                    updatePayload.password = password;
+                } else if (password !== undefined && password.length > 0 && password.length < 6) {
+                    alert('Password jika diisi harus minimal 6 karakter. Biarkan kosong jika tidak ingin mengubah.');
+                    return;
+                }
+                await fetchAPI(`/api/admin/users/${encodeURIComponent(currentEditEmail)}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(updatePayload)
+                });
+                alert('✏️ User berhasil diperbarui!');
+            }
+            if (bsModal) bsModal.hide();
+            document.getElementById('modalEmail').disabled = false;
+            loadUsers();
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    });
+    
+    async function deleteUser(email) {
+        if (confirm(`Hapus user dengan email "${email}"? Tindakan ini permanen.`)) {
+            try {
+                await fetchAPI(`/api/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' });
+                alert('User berhasil dihapus.');
+                loadUsers();
+            } catch (err) {
+                alert('Gagal menghapus: ' + err.message);
+            }
+        }
+    }
+    
+    window.onload = async () => {
+        const modalElement = document.getElementById('userModal');
+        if (modalElement) {
+            bsModal = new bootstrap.Modal(modalElement, { backdrop: 'static', keyboard: true });
+            modalElement.addEventListener('hidden.bs.modal', function () {
+                document.getElementById('modalEmail').disabled = false;
+                document.getElementById('modalPassword').value = '';
+            });
+        }
+        
+        const statusDiv = document.getElementById('statusMessage');
+        statusDiv.style.display = 'none';
+        const loginSuccess = await autoLoginAdmin();
+        if (loginSuccess) {
+            await loadUsers();
+        } else {
+            try {
+                await loadUsers();
+            } catch (err) {
+                const container = document.getElementById('userTableContainer');
+                container.innerHTML = `<div class="alert alert-warning rounded-3"><i class="bi bi-shield-exclamation"></i> Tidak dapat mengakses data. Pastikan backend menyala.</div>`;
+            }
+        }
+    };
+</script>
+</body>
+</html>

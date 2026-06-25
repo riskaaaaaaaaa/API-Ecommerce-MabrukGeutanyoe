@@ -1,0 +1,336 @@
+<!-- <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Kelola Alamat Toko</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .current-address {
+            background: #e8f5e9;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border-left: 4px solid #4caf50;
+        }
+        .current-address strong {
+            color: #2e7d32;
+        }
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .info-box p {
+            color: #1976d2;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2>🏪 Alamat Toko / Asal Pengiriman</h2>
+            
+            <div id="currentAddress" class="current-address"></div>
+            
+            <form id="storeAddressForm">
+                <div class="form-group">
+                    <label>📍 Provinsi</label>
+                    <select id="province" required>
+                        <option value="">-- Pilih Provinsi --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>🏙️ Kota/Kabupaten</label>
+                    <select id="city" required disabled>
+                        <option value="">-- Pilih Provinsi Dulu --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>📮 Kode Pos</label>
+                    <input type="text" id="postal_code" placeholder="Kode pos">
+                </div>
+                
+                <div class="form-group">
+                    <label>📝 Detail Alamat Lengkap</label>
+                    <textarea id="address_detail" rows="3" placeholder="Nama jalan, nomor, gedung, RT/RW, kelurahan, kecamatan" required></textarea>
+                </div>
+                
+                <button type="submit" id="submitBtn">💾 Simpan Alamat Toko</button>
+            </form>
+            
+            <div id="alert" class="alert"></div>
+            
+            <div class="info-box">
+                <p>✅ <strong>Informasi:</strong></p>
+                <p>• Alamat ini akan digunakan sebagai <strong>asal pengiriman</strong> untuk semua transaksi</p>
+                <p>• Customer akan melihat ongkir berdasarkan alamat toko ini</p>
+                <p>• Hanya 1 alamat toko yang aktif, simpan baru akan mengganti yang lama</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let provincesData = [];
+        let citiesCache = {};
+        
+        // Load provinces
+        async function loadProvinces() {
+            try {
+                const response = await fetch('/api/ongkir/provinces');
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    provincesData = data;
+                    const select = document.getElementById('province');
+                    select.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                    
+                    data.forEach(province => {
+                        const option = document.createElement('option');
+                        option.value = province.province_id || province.id;
+                        option.textContent = province.province || province.name;
+                        select.appendChild(option);
+                    });
+                } else {
+                    console.error('Data provinsi kosong');
+                }
+            } catch (error) {
+                console.error('Error loading provinces:', error);
+                showAlert('Gagal memuat provinsi', 'error');
+            }
+        }
+        
+        // Load cities based on province
+        async function loadCities(provinceId, targetSelectId) {
+            const select = document.getElementById(targetSelectId);
+            
+            if (!provinceId || provinceId === "") {
+                select.innerHTML = '<option value="">-- Pilih Provinsi Dulu --</option>';
+                select.disabled = true;
+                return;
+            }
+            
+            if (citiesCache[provinceId]) {
+                populateCitySelect(select, citiesCache[provinceId]);
+                return;
+            }
+            
+            select.innerHTML = '<option value="">⏳ Loading...</option>';
+            select.disabled = true;
+            
+            try {
+                const response = await fetch(`/api/ongkir/cities/${provinceId}`);
+                const data = await response.json();
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    citiesCache[provinceId] = data;
+                    populateCitySelect(select, data);
+                } else {
+                    select.innerHTML = '<option value="">Tidak ada kota untuk provinsi ini</option>';
+                    select.disabled = true;
+                }
+            } catch (error) {
+                console.error('Error loading cities:', error);
+                select.innerHTML = '<option value="">Error loading cities</option>';
+                select.disabled = true;
+            }
+        }
+        
+        function populateCitySelect(select, cities) {
+            select.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.city_id;
+                option.textContent = city.city_name;
+                option.setAttribute('data-postal', city.zip_code || '');
+                select.appendChild(option);
+            });
+            select.disabled = false;
+        }
+        
+        // Load current store address
+        async function loadCurrentAddress() {
+            try {
+                const response = await fetch('/api/ongkir/store-address');
+                const data = await response.json();
+                
+                const container = document.getElementById('currentAddress');
+                
+                if (data && data.city_name) {
+                    container.innerHTML = `
+                        <strong>📍 Alamat Toko Saat Ini:</strong><br><br>
+                        ${data.address_detail}<br>
+                        ${data.city_name}, ${data.province_name}<br>
+                        ${data.postal_code ? '📮 Kode Pos: ' + data.postal_code : ''}
+                    `;
+                } else {
+                    container.innerHTML = '⚠️ <strong>Belum ada alamat toko</strong><br>Silakan isi form di bawah untuk mengatur alamat toko.';
+                }
+            } catch (error) {
+                console.error('Error loading store address:', error);
+            }
+        }
+        
+        // Save store address
+        document.getElementById('storeAddressForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const provinceSelect = document.getElementById('province');
+            const citySelect = document.getElementById('city');
+            const postalCode = document.getElementById('postal_code').value;
+            const addressDetail = document.getElementById('address_detail').value;
+            
+            if (!provinceSelect.value || !citySelect.value || !addressDetail) {
+                showAlert('❌ Harap lengkapi semua field yang wajib!', 'error');
+                return;
+            }
+            
+            const selectedProvince = provinceSelect.options[provinceSelect.selectedIndex];
+            const selectedCity = citySelect.options[citySelect.selectedIndex];
+            
+            const data = {
+                province_id: provinceSelect.value,
+                province_name: selectedProvince.text,
+                city_id: citySelect.value,
+                city_name: selectedCity.text,
+                postal_code: postalCode,
+                address_detail: addressDetail
+            };
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '⏳ Menyimpan...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/api/ongkir/store-address', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✅ Alamat toko berhasil disimpan!', 'success');
+                    loadCurrentAddress();
+                    document.getElementById('storeAddressForm').reset();
+                } else {
+                    showAlert('❌ Gagal menyimpan alamat: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error saving:', error);
+                showAlert('❌ Terjadi kesalahan saat menyimpan', 'error');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Event listeners
+        document.getElementById('province').addEventListener('change', (e) => {
+            loadCities(e.target.value, 'city');
+        });
+        
+        document.getElementById('city').addEventListener('change', (e) => {
+            const selectedOption = e.target.options[e.target.selectedIndex];
+            const postalCode = selectedOption.getAttribute('data-postal');
+            if (postalCode && postalCode !== '') {
+                document.getElementById('postal_code').value = postalCode;
+            }
+        });
+        
+        // Initialize
+        loadProvinces();
+        loadCurrentAddress();
+    </script>
+</body>
+</html> -->

@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Alamat User - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 130px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 140px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Search & filter bar */
+        .search-wrapper {
+            background: white;
+            border-radius: 1.25rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #eef2f8;
+        }
+        .search-input-group {
+            position: relative;
+            flex: 1;
+        }
+        .search-input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9bb5b0;
+        }
+        .search-input-group input {
+            width: 100%;
+            padding: 0.7rem 1rem 0.7rem 2.5rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .search-input-group input:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        .btn-refresh {
+            background: transparent;
+            border: 1px solid #3A7B70;
+            color: #3A7B70;
+            border-radius: 2rem;
+            padding: 0.5rem 1.5rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-refresh:hover {
+            background: rgba(58, 123, 112, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #eef2f8;
+            transition: all 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .stat-card .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #3A7B70;
+        }
+        .stat-card .label {
+            color: #6B7C7A;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+        
+        /* User Group Card */
+        .address-group-card {
+            background: white;
+            border-radius: 1.25rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #eef2f8;
+            overflow: hidden;
+        }
+        .address-header {
+            background: #F8FAFC;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #eef2f8;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .user-avatar {
+            width: 44px;
+            height: 44px;
+            background: #E8F5F2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3A7B70;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .user-details h3 {
+            color: #2C3E3B;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .user-details p {
+            color: #6B7C7A;
+            font-size: 0.7rem;
+            margin: 0;
+        }
+        .badge-address-count {
+            background: rgba(58, 123, 112, 0.12);
+            padding: 0.3rem 0.8rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #3A7B70;
+        }
+        .btn-add-new-address {
+            background: #3A7B70;
+            color: white;
+            border: none;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-add-new-address:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        
+        /* Address Item */
+        .address-item {
+            padding: 1rem 1.25rem;
+            margin: 0.75rem;
+            background: #FEFEFE;
+            border-radius: 1rem;
+            border: 1px solid #eef2f8;
+        }
+        .address-line {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .address-label {
+            width: 90px;
+            flex-shrink: 0;
+            color: #9bb5b0;
+            font-weight: 500;
+        }
+        .address-value {
+            flex: 1;
+            color: #2C3E3B;
+            font-weight: 500;
+        }
+        .badge-primary-address {
+            background: #3A7B70;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.15rem 0.6rem;
+            font-size: 0.65rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+            display: inline-block;
+        }
+        .address-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #eef2f8;
+        }
+        .btn-edit {
+            background: transparent;
+            border: 1px solid #3A7B70;
+            color: #3A7B70;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-edit:hover {
+            background: rgba(58, 123, 112, 0.1);
+            transform: translateY(-1px);
+        }
+        .btn-delete {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-delete:hover {
+            background: #F08A5D;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Modal styling - SAMA dengan halaman lain */
+        .modal-custom {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 550px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+        }
+        .modal-container h2 {
+            color: #3A7B70;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.8rem;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+            accent-color: #3A7B70;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .modal-actions button {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-save {
+            background: #3A7B70;
+            color: white;
+        }
+        .btn-save:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-cancel {
+            background: #f0f3f2;
+            color: #5a6e6a;
+        }
+        .btn-cancel:hover {
+            background: #e4eae8;
+            transform: translateY(-1px);
+        }
+        
+        /* Loading & empty state */
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 1.25rem;
+        }
+        .spinner-border-custom {
+            width: 2rem;
+            height: 2rem;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #3A7B70;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            background: white;
+            border-radius: 1.25rem;
+            color: #6B7C7A;
+        }
+        
+        /* Toast - SAMA dengan halaman lain */
+        .toast-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2C3E3B;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1200;
+            font-size: 0.85rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 105px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .address-label {
+                width: 100%;
+                margin-bottom: 0.25rem;
+            }
+            .address-line {
+                flex-direction: column;
+            }
+            .address-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .btn-edit, .btn-delete, .btn-add-new-address {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+            .address-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+            .btn-refresh {
+                padding: 0.3rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 130px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 140px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-geo-alt-fill"></i> Kelola Alamat User
+        </h1>
+        <p class="mb-0 opacity-75 small">Mengelola semua alamat pengguna dan tambah alamat baru</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Search & Filter Bar -->
+    <div class="search-wrapper">
+        <div class="d-flex flex-wrap gap-3">
+            <div class="search-input-group flex-grow-1">
+                <i class="bi bi-search"></i>
+                <input type="text" id="searchInput" placeholder="Cari nama user, alamat, atau kota..." onkeyup="filterAddresses()">
+            </div>
+            <button class="btn-refresh" onclick="loadAllAddresses()"><i class="bi bi-arrow-repeat"></i> Refresh</button>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="stats">
+        <div class="stat-card">
+            <div class="number" id="totalAddresses">0</div>
+            <div class="label">Total Alamat</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" id="totalUsers">0</div>
+            <div class="label">Total User</div>
+        </div>
+        <div class="stat-card">
+            <div class="number" id="defaultAddresses">0</div>
+            <div class="label">Alamat Utama</div>
+        </div>
+    </div>
+
+    <!-- Addresses Container -->
+    <div id="addressesContainer">
+        <div class="loading-state">
+            <div class="spinner-border-custom"></div>
+            <p class="text-muted small">Memuat data alamat...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tambah Alamat Baru untuk User tertentu -->
+<div id="addAddressModal" class="modal-custom">
+    <div class="modal-container">
+        <h2><i class="bi bi-plus-circle"></i> Tambah Alamat Baru</h2>
+        <div id="addAlert" style="display:none;"></div>
+        <form id="addAddressForm">
+            <input type="hidden" id="addUserId">
+            <div class="form-group"><label>Nama Penerima</label><input type="text" id="addName" required></div>
+            <div class="form-group"><label>No Telepon</label><input type="text" id="addPhone" required></div>
+            <div class="form-group">
+                <label>Provinsi</label>
+                <select id="addProvince" required><option value="">-- Pilih Provinsi --</option></select>
+            </div>
+            <div class="form-group">
+                <label>Kota/Kabupaten</label>
+                <select id="addCity" required disabled><option value="">-- Pilih Provinsi Dulu --</option></select>
+            </div>
+            <div class="form-group"><label>Kode Pos</label><input type="text" id="addPostalCode"></div>
+            <div class="form-group"><label>Alamat Lengkap</label><textarea id="addAddressDetail" rows="3" required></textarea></div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="addIsDefault"> <label style="margin:0;">Jadikan Alamat Utama</label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeAddModal()">Batal</button>
+                <button type="submit" class="btn-save">Simpan Alamat</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Alamat (existing) -->
+<div id="editModal" class="modal-custom">
+    <div class="modal-container">
+        <h2><i class="bi bi-pencil-square"></i> Edit Alamat</h2>
+        <div id="editAlert" style="display:none;"></div>
+        <form id="editForm">
+            <input type="hidden" id="editAddressId">
+            <div class="form-group"><label>Nama Penerima</label><input type="text" id="editName" required></div>
+            <div class="form-group"><label>No Telepon</label><input type="text" id="editPhone" required></div>
+            <div class="form-group"><label>Provinsi</label><input type="text" id="editProvince" required></div>
+            <div class="form-group"><label>Kota</label><input type="text" id="editCity" required></div>
+            <div class="form-group"><label>Alamat Lengkap</label><textarea id="editAddressDetail" rows="3" required></textarea></div>
+            <div class="form-group"><label>Kode Pos</label><input type="text" id="editPostalCode"></div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="editIsDefault"> <label style="margin:0;">Jadikan Alamat Utama</label>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeEditModal()">Batal</button>
+                <button type="submit" class="btn-save">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="globalToast" class="toast-message"></div>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    let allAddresses = [];
+    let citiesCache = {};
+
+    async function loadAllAddresses() {
+        showLoading();
+        try {
+            const response = await fetch('/api/ongkir/admin/user-addresses');
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                allAddresses = data;
+                updateStats();
+                displayAddresses(allAddresses);
+            } else {
+                showErrorToast('Gagal memuat data: format tidak sesuai');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showErrorToast('Terjadi kesalahan: ' + error.message);
+            showErrorDisplay(error.message);
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('totalAddresses').textContent = allAddresses.length;
+        const uniqueUsers = new Set(allAddresses.map(a => a.user_id)).size;
+        document.getElementById('totalUsers').textContent = uniqueUsers;
+        const defaultAddresses = allAddresses.filter(a => a.is_default == 1).length;
+        document.getElementById('defaultAddresses').textContent = defaultAddresses;
+    }
+
+    function filterAddresses() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allAddresses.filter(addr => 
+            (addr.name || '').toLowerCase().includes(term) ||
+            (addr.address_detail || '').toLowerCase().includes(term) ||
+            (addr.city_name || '').toLowerCase().includes(term) ||
+            (addr.province_name || '').toLowerCase().includes(term) ||
+            (addr.phone || '').includes(term)
+        );
+        displayAddresses(filtered);
+    }
+
+    function displayAddresses(addresses) {
+        const container = document.getElementById('addressesContainer');
+        if (!addresses.length) {
+            container.innerHTML = `<div class="empty-state"><i class="bi bi-inbox fs-1 text-secondary"></i><p class="mt-2">Tidak ada alamat yang ditemukan</p></div>`;
+            return;
+        }
+
+        const grouped = {};
+        addresses.forEach(addr => { if (!grouped[addr.user_id]) grouped[addr.user_id] = []; grouped[addr.user_id].push(addr); });
+
+        let html = '';
+        for (const [userId, userAddresses] of Object.entries(grouped)) {
+            const firstAddr = userAddresses[0];
+            const userName = firstAddr?.name || userId.substring(0, 14);
+            const initial = userName.charAt(0).toUpperCase();
+            const addrCount = userAddresses.length;
+            html += `
+                <div class="address-group-card">
+                    <div class="address-header">
+                        <div class="user-info">
+                            <div class="user-avatar">${escapeHtml(initial)}</div>
+                            <div class="user-details">
+                                <h3>${escapeHtml(userName)}</h3>
+                                <p><i class="bi bi-person-badge"></i> ID: ${userId.substring(0, 18)}${userId.length > 18 ? '…' : ''}</p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center flex-wrap">
+                            <span class="badge-address-count"><i class="bi bi-pin-map-fill"></i> ${addrCount} Alamat</span>
+                            <button class="btn-add-new-address" onclick="openAddAddressModal('${escapeHtml(userId)}')"><i class="bi bi-plus-lg"></i> Tambah Alamat</button>
+                        </div>
+                    </div>
+            `;
+            userAddresses.forEach(addr => {
+                const isDefault = addr.is_default == 1;
+                html += `
+                    <div class="address-item">
+                        <div class="address-line"><div class="address-label">Nama:</div><div class="address-value"><strong>${escapeHtml(addr.name || '-')}</strong> ${isDefault ? '<span class="badge-primary-address">Utama</span>' : ''}</div></div>
+                        <div class="address-line"><div class="address-label">Telepon:</div><div class="address-value">${escapeHtml(addr.phone || '-')}</div></div>
+                        <div class="address-line"><div class="address-label">Alamat:</div><div class="address-value">${escapeHtml(addr.address_detail || '-')}</div></div>
+                        <div class="address-line"><div class="address-label">Kota/Prov:</div><div class="address-value">${escapeHtml(addr.city_name || '-')}, ${escapeHtml(addr.province_name || '-')}</div></div>
+                        <div class="address-line"><div class="address-label">Kode Pos:</div><div class="address-value">${escapeHtml(addr.postal_code || '-')}</div></div>
+                        <div class="address-actions">
+                            <button class="btn-edit" onclick="openEditModal(${addr.id})"><i class="bi bi-pencil"></i> Edit</button>
+                            <button class="btn-delete" onclick="deleteAddress(${addr.id})"><i class="bi bi-trash"></i> Hapus</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+        container.innerHTML = html;
+    }
+
+    async function openAddAddressModal(userId) {
+        document.getElementById('addUserId').value = userId;
+        document.getElementById('addAddressForm').reset();
+        document.getElementById('addIsDefault').checked = false;
+        await loadProvincesForAdd();
+        document.getElementById('addAddressModal').style.display = 'flex';
+    }
+
+    function closeAddModal() {
+        document.getElementById('addAddressModal').style.display = 'none';
+        const alertDiv = document.getElementById('addAlert');
+        alertDiv.style.display = 'none';
+        alertDiv.innerHTML = '';
+    }
+
+    async function loadProvincesForAdd() {
+        try {
+            const response = await fetch('/api/ongkir/provinces');
+            const data = await response.json();
+            const select = document.getElementById('addProvince');
+            if (Array.isArray(data) && data.length) {
+                select.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                data.forEach(prov => {
+                    const option = document.createElement('option');
+                    option.value = prov.province_id || prov.id;
+                    option.textContent = prov.province || prov.name;
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error load provinces:', error);
+            showGlobalToast('Gagal memuat provinsi', true);
+        }
+    }
+
+    document.getElementById('addProvince').addEventListener('change', async (e) => {
+        const provinceId = e.target.value;
+        const citySelect = document.getElementById('addCity');
+        if (!provinceId) {
+            citySelect.innerHTML = '<option value="">-- Pilih Provinsi Dulu --</option>';
+            citySelect.disabled = true;
+            return;
+        }
+        citySelect.innerHTML = '<option value="">⏳ Loading...</option>';
+        citySelect.disabled = true;
+        try {
+            const response = await fetch(`/api/ongkir/cities/${provinceId}`);
+            const data = await response.json();
+            if (Array.isArray(data) && data.length) {
+                citiesCache[provinceId] = data;
+                citySelect.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+                data.forEach(city => {
+                    const opt = document.createElement('option');
+                    opt.value = city.city_id;
+                    opt.textContent = city.city_name;
+                    opt.setAttribute('data-zip', city.zip_code || '');
+                    citySelect.appendChild(opt);
+                });
+                citySelect.disabled = false;
+            } else {
+                citySelect.innerHTML = '<option value="">Tidak ada kota</option>';
+                citySelect.disabled = true;
+            }
+        } catch (error) {
+            citySelect.innerHTML = '<option value="">Error loading</option>';
+            citySelect.disabled = true;
+        }
+    });
+
+    document.getElementById('addCity').addEventListener('change', (e) => {
+        const selected = e.target.options[e.target.selectedIndex];
+        const zip = selected?.getAttribute('data-zip');
+        if (zip) document.getElementById('addPostalCode').value = zip;
+    });
+
+    document.getElementById('addAddressForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const userId = document.getElementById('addUserId').value;
+        const name = document.getElementById('addName').value;
+        const phone = document.getElementById('addPhone').value;
+        const provinceSelect = document.getElementById('addProvince');
+        const citySelect = document.getElementById('addCity');
+        const provinceId = provinceSelect.value;
+        const provinceName = provinceSelect.options[provinceSelect.selectedIndex]?.text || '';
+        const cityId = citySelect.value;
+        const cityName = citySelect.options[citySelect.selectedIndex]?.text || '';
+        const postalCode = document.getElementById('addPostalCode').value;
+        const addressDetail = document.getElementById('addAddressDetail').value;
+        const isDefault = document.getElementById('addIsDefault').checked ? 1 : 0;
+
+        if (!provinceId || !cityId || !addressDetail) {
+            showAddAlert('❌ Harap lengkapi Provinsi, Kota, dan Alamat Lengkap', 'error');
+            return;
+        }
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch('/api/ongkir/user-addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userId,
+                    name, phone,
+                    province_id: provinceId, province_name: provinceName,
+                    city_id: cityId, city_name: cityName,
+                    postal_code: postalCode,
+                    address_detail: addressDetail,
+                    is_default: isDefault
+                })
+            });
+            const result = await response.json();
+            if (result.success) {
+                showGlobalToast('✅ Alamat berhasil ditambahkan', false);
+                closeAddModal();
+                loadAllAddresses();
+            } else {
+                showAddAlert('❌ Gagal: ' + (result.error || 'Unknown'), 'error');
+            }
+        } catch (error) {
+            showAddAlert('❌ Error: ' + error.message, 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    function showAddAlert(msg, type) {
+        const alertDiv = document.getElementById('addAlert');
+        alertDiv.innerHTML = `<div style="background:${type === 'success' ? '#E8F5F2' : '#FEF3E8'}; color:${type === 'success' ? '#3A7B70' : '#F08A5D'}; padding:0.75rem; border-radius:1rem; margin-bottom:1rem;">${msg}</div>`;
+        alertDiv.style.display = 'block';
+        setTimeout(() => { if(alertDiv) alertDiv.style.display = 'none'; }, 2500);
+    }
+
+    async function openEditModal(addressId) {
+        const address = allAddresses.find(a => a.id === addressId);
+        if (!address) return;
+        document.getElementById('editAddressId').value = address.id;
+        document.getElementById('editName').value = address.name || '';
+        document.getElementById('editPhone').value = address.phone || '';
+        document.getElementById('editProvince').value = address.province_name || '';
+        document.getElementById('editCity').value = address.city_name || '';
+        document.getElementById('editAddressDetail').value = address.address_detail || '';
+        document.getElementById('editPostalCode').value = address.postal_code || '';
+        document.getElementById('editIsDefault').checked = address.is_default == 1;
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        const alertDiv = document.getElementById('editAlert');
+        alertDiv.style.display = 'none';
+        alertDiv.innerHTML = '';
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const addressId = document.getElementById('editAddressId').value;
+        const data = {
+            name: document.getElementById('editName').value,
+            phone: document.getElementById('editPhone').value,
+            province_name: document.getElementById('editProvince').value,
+            city_name: document.getElementById('editCity').value,
+            address_detail: document.getElementById('editAddressDetail').value,
+            postal_code: document.getElementById('editPostalCode').value,
+            is_default: document.getElementById('editIsDefault').checked ? 1 : 0,
+            province_id: '0', city_id: '0'
+        };
+        try {
+            const response = await fetch(`/api/ongkir/admin/user-addresses/${addressId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                showEditAlert('✅ Alamat berhasil diupdate!', 'success');
+                setTimeout(() => { closeEditModal(); loadAllAddresses(); }, 1300);
+            } else {
+                showEditAlert('❌ Gagal update: ' + (result.error || 'Unknown'), 'error');
+            }
+        } catch (error) {
+            showEditAlert('❌ Error: ' + error.message, 'error');
+        }
+    });
+
+    async function deleteAddress(addressId) {
+        if (!confirm('Hapus alamat ini? Tindakan permanen.')) return;
+        try {
+            const response = await fetch(`/api/ongkir/admin/user-addresses/${addressId}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                showGlobalToast('✅ Alamat dihapus', false);
+                loadAllAddresses();
+            } else {
+                showGlobalToast('❌ Gagal hapus: ' + (result.error || ''), true);
+            }
+        } catch (error) {
+            showGlobalToast('❌ Error: ' + error.message, true);
+        }
+    }
+
+    function showEditAlert(msg, type) {
+        const alertDiv = document.getElementById('editAlert');
+        alertDiv.innerHTML = `<div style="background:${type === 'success' ? '#E8F5F2' : '#FEF3E8'}; color:${type === 'success' ? '#3A7B70' : '#F08A5D'}; padding:0.75rem; border-radius:1rem; margin-bottom:1rem;">${msg}</div>`;
+        alertDiv.style.display = 'block';
+        setTimeout(() => { if(alertDiv) alertDiv.style.display = 'none'; }, 2500);
+    }
+
+    function showLoading() {
+        document.getElementById('addressesContainer').innerHTML = `<div class="loading-state"><div class="spinner-border-custom"></div><p class="text-muted small">Memuat data alamat...</p></div>`;
+    }
+
+    function showErrorDisplay(message) {
+        document.getElementById('addressesContainer').innerHTML = `<div class="empty-state"><i class="bi bi-exclamation-triangle-fill fs-1 text-danger"></i><p class="mt-2">${message}</p><button onclick="loadAllAddresses()" style="margin-top:1rem; background:#3A7B70; border:none; border-radius:2rem; padding:0.5rem 1.5rem; color:white;">Coba Lagi</button></div>`;
+    }
+
+    function showGlobalToast(msg, isError = false) {
+        const toast = document.getElementById('globalToast');
+        toast.textContent = msg;
+        toast.style.backgroundColor = isError ? '#F08A5D' : '#2C3E3B';
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2500);
+    }
+    function showErrorToast(msg) { showGlobalToast(msg, true); }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target === modal) closeEditModal();
+        const addModal = document.getElementById('addAddressModal');
+        if (event.target === addModal) closeAddModal();
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    loadAllAddresses();
+</script>
+</body>
+</html>

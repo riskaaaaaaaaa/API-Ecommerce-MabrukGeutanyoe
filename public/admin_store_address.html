@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Kelola Alamat Toko - Admin Hijab Store</title>
+    <!-- Bootstrap 5 CSS + Icons + Font -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <style>
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        
+        * {
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f4f7fc;
+            overflow-x: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Container utama - beri padding top agar konten tidak tertutup fixed header */
+        .container-fluid-custom {
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 110px 1.5rem 1rem 1.5rem;
+        }
+        @media (min-width: 1400px) {
+            .container-fluid-custom {
+                padding: 120px 2rem 1.5rem 2rem;
+            }
+        }
+        
+        /* Header FIXED - selalu di atas layar, TIDAK ikut scroll */
+        .gradient-header {
+            background: linear-gradient(135deg, #2C3E3B 0%, #3A7B70 100%);
+            padding: 0.8rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Agar fixed header tidak melebar melebihi container pada layar besar */
+        @media (min-width: 1600px) {
+            .gradient-header {
+                left: 50%;
+                transform: translateX(-50%);
+                width: 100%;
+                max-width: 1600px;
+            }
+        }
+        
+        /* Custom card styling - SAMA dengan halaman lain */
+        .card-custom {
+            border: none;
+            border-radius: 1.25rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03), 0 2px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: white;
+            overflow: hidden;
+        }
+        .card-custom:hover {
+            box-shadow: 0 16px 28px rgba(0, 0, 0, 0.08);
+        }
+        
+        /* Tombol back di dalam fixed header */
+        .btn-back-custom {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            transition: all 0.2s;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.4rem 1rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .btn-back-custom:hover {
+            background: rgba(255,255,255,0.25);
+            transform: translateX(-3px);
+            color: white;
+        }
+        
+        /* Alamat aktif card */
+        .active-address-card {
+            background: #E8F5F2;
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #3A7B70;
+        }
+        .address-label-badge {
+            background: #3A7B70;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.25rem 0.75rem;
+            border-radius: 2rem;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* Alamat lainnya */
+        .other-address-item {
+            background: #FEFEFE;
+            border: 1px solid #eef2f8;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+        .other-address-item:hover {
+            background: #F8FAFC;
+            border-color: #d0e2dd;
+        }
+        .badge-inactive {
+            background: #bdc9c5;
+            color: white;
+            font-size: 0.65rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            margin-left: 0.5rem;
+        }
+        
+        /* Form styling - SAMA dengan halaman lain */
+        .form-label-custom {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2C3E3B;
+            font-size: 0.85rem;
+        }
+        .form-control-custom {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        .form-control-custom:focus {
+            outline: none;
+            border-color: #3A7B70;
+            box-shadow: 0 0 0 3px rgba(58, 123, 112, 0.1);
+        }
+        textarea.form-control-custom {
+            border-radius: 1.25rem;
+            resize: vertical;
+        }
+        select.form-control-custom {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233A7B70' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+        
+        /* Button styling - SAMA dengan halaman lain */
+        .btn-primary-custom {
+            background: #3A7B70;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            font-weight: 600;
+            border-radius: 2rem;
+            transition: all 0.2s;
+            color: white;
+        }
+        .btn-primary-custom:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid #3A7B70;
+            color: #3A7B70;
+            border-radius: 2rem;
+            padding: 0.3rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-outline-custom:hover {
+            background: rgba(58, 123, 112, 0.1);
+            transform: translateY(-1px);
+        }
+        .btn-danger-custom {
+            background: #FEF3E8;
+            border: 1px solid #F08A5D;
+            color: #F08A5D;
+            border-radius: 2rem;
+            padding: 0.3rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-danger-custom:hover {
+            background: #FEF3E8;
+            transform: translateY(-1px);
+        }
+        .btn-sm-success {
+            background: #3A7B70;
+            border: none;
+            color: white;
+            border-radius: 2rem;
+            padding: 0.3rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-sm-success:hover {
+            background: #2c5e55;
+            transform: translateY(-1px);
+        }
+        
+        /* Info box */
+        .info-box-custom {
+            background: #F8FAFC;
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border: 1px solid #eef2f8;
+        }
+        
+        /* Modal - SAMA dengan halaman lain */
+        .modal-custom {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(3px);
+            z-index: 1100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-container {
+            background: white;
+            border-radius: 1.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+            box-shadow: 0 20px 35px rgba(0, 0, 0, 0.2);
+        }
+        .modal-container h3 {
+            color: #3A7B70;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+            font-size: 1.3rem;
+        }
+        
+        /* Toast/Alert - SAMA dengan halaman lain */
+        .alert-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2C3E3B;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1200;
+            font-size: 0.85rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            pointer-events: none;
+        }
+        .inline-alert {
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            margin-top: 1rem;
+            display: none;
+            font-size: 0.85rem;
+        }
+        .inline-alert.success {
+            background: #E8F5F2;
+            color: #3A7B70;
+            border-left: 4px solid #3A7B70;
+        }
+        .inline-alert.error {
+            background: #FEF3E8;
+            color: #F08A5D;
+            border-left: 4px solid #F08A5D;
+        }
+        
+        /* Responsive - SAMA dengan halaman lain */
+        @media (max-width: 768px) {
+            .container-fluid-custom {
+                padding: 90px 0.75rem 0.75rem 0.75rem;
+            }
+            .gradient-header {
+                padding: 0.6rem 1rem;
+            }
+            .active-address-card {
+                padding: 1rem;
+            }
+            .other-address-item .d-flex {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            .address-actions-group {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .address-actions-group .btn-outline-custom,
+            .address-actions-group .btn-danger-custom {
+                width: 100%;
+                text-align: center;
+            }
+            .address-item-actions {
+                flex-wrap: wrap;
+            }
+            .btn-back-custom {
+                padding: 0.3rem 0.8rem;
+                font-size: 0.75rem;
+            }
+        }
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .container-fluid-custom {
+                padding: 110px 1.5rem 1rem 1.5rem;
+            }
+        }
+        @media (min-width: 1200px) {
+            .container-fluid-custom {
+                padding: 120px 2.5rem 1.5rem 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header FIXED - selalu di atas, TIDAK ikut scroll -->
+<div class="gradient-header text-white d-flex flex-wrap justify-content-between align-items-center">
+    <div>
+        <h1 class="h4 fw-bold mb-1 d-flex align-items-center gap-2">
+            <i class="bi bi-shop"></i> Kelola Alamat Toko
+        </h1>
+        <p class="mb-0 opacity-75 small">Atur alamat asal pengiriman untuk semua transaksi</p>
+    </div>
+    <button class="btn-back-custom mt-2 mt-sm-0" onclick="window.location.href='index.html'">
+        <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
+    </button>
+</div>
+
+<div class="container-fluid-custom">
+    <!-- Kartu Utama -->
+    <div class="card card-custom">
+        <div class="card-body p-4">
+            <!-- Tempat alamat aktif -->
+            <div id="currentAddressContainer"></div>
+
+            <!-- Form tambah alamat baru -->
+            <h5 class="fw-bold mb-3" style="color: #3A7B70;"><i class="bi bi-plus-circle"></i> Tambah Alamat Baru</h5>
+            <form id="storeAddressForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-geo-alt"></i> Provinsi</label>
+                        <select id="province" class="form-control-custom" required>
+                            <option value="">-- Pilih Provinsi --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-building"></i> Kota/Kabupaten</label>
+                        <select id="city" class="form-control-custom" required disabled>
+                            <option value="">-- Pilih Provinsi Dulu --</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom"><i class="bi bi-envelope"></i> Kode Pos</label>
+                        <input type="text" id="postal_code" class="form-control-custom" placeholder="Kode pos">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom"><i class="bi bi-pin-map-fill"></i> Detail Alamat Lengkap</label>
+                        <textarea id="address_detail" class="form-control-custom" rows="3" placeholder="Nama jalan, nomor, gedung, RT/RW, kelurahan, kecamatan" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" id="submitBtn" class="btn btn-primary-custom w-100">
+                            <i class="bi bi-save"></i> Simpan Alamat Toko
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="inlineAlert" class="inline-alert"></div>
+
+            <div class="info-box-custom">
+                <i class="bi bi-info-circle-fill" style="color: #3A7B70;"></i>
+                <strong class="ms-1">Informasi:</strong>
+                <p class="mt-2 mb-1 small text-secondary">• Alamat ini akan digunakan sebagai <strong>asal pengiriman</strong> untuk semua transaksi.</p>
+                <p class="mb-1 small text-secondary">• Customer akan melihat ongkir berdasarkan alamat toko ini.</p>
+                <p class="mb-1 small text-secondary">• Hanya 1 alamat toko yang aktif, simpan baru akan mengganti yang lama.</p>
+                <p class="mb-0 small text-secondary">• Anda dapat menyimpan beberapa alamat dan memilih salah satu sebagai aktif.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Edit Alamat -->
+<div id="editModal" class="modal-custom">
+    <div class="modal-container">
+        <h3><i class="bi bi-pencil-square"></i> Edit Alamat Toko</h3>
+        <form id="editForm">
+            <input type="hidden" id="editAddressId">
+            <div class="mb-3">
+                <label class="form-label-custom">Provinsi</label>
+                <input type="text" id="editProvinceName" class="form-control-custom" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label-custom">Kota/Kabupaten</label>
+                <input type="text" id="editCityName" class="form-control-custom" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label-custom">Kode Pos</label>
+                <input type="text" id="editPostalCode" class="form-control-custom">
+            </div>
+            <div class="mb-3">
+                <label class="form-label-custom">Detail Alamat Lengkap</label>
+                <textarea id="editAddressDetail" class="form-control-custom" rows="3" required></textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-secondary w-50 rounded-pill" onclick="closeEditModal()" style="background: #e2e8f0; border: none; color: #2C3E3B;">Batal</button>
+                <button type="submit" class="btn btn-primary-custom w-50">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="globalToast" class="alert-toast"></div>
+
+<script>
+    // ================= LOGIKA ASLI TIDAK BERUBAH =================
+    let citiesCache = {};
+    let allStoreAddresses = [];
+    let currentEditingId = null;
+
+    async function loadAllStoreAddresses() {
+        try {
+            const response = await fetch('/api/ongkir/store-addresses');
+            const data = await response.json();
+            if (Array.isArray(data)) {
+                allStoreAddresses = data;
+                displayCurrentAddress();
+            }
+        } catch (error) {
+            console.error('Error loading store addresses:', error);
+            showInlineAlert('Gagal memuat data alamat toko', 'error');
+        }
+    }
+
+    function displayCurrentAddress() {
+        const activeAddress = allStoreAddresses.find(addr => addr.is_active === 1 || addr.is_active === true);
+        const container = document.getElementById('currentAddressContainer');
+
+        if (activeAddress) {
+            const otherAddresses = allStoreAddresses.filter(addr => addr.id !== activeAddress.id);
+            let otherHtml = '';
+            if (otherAddresses.length > 0) {
+                otherHtml = `<div class="mt-4"><strong class="small text-secondary"><i class="bi bi-archive"></i> Alamat Lainnya:</strong><div class="mt-2">`;
+                otherAddresses.forEach(addr => {
+                    otherHtml += `
+                        <div class="other-address-item">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start">
+                                <div class="flex-grow-1 me-2">
+                                    <strong>${escapeHtml(addr.city_name || '-')}</strong> <span class="badge-inactive">Tidak Aktif</span>
+                                    <div class="small text-secondary mt-1">${escapeHtml(addr.address_detail || '-')}</div>
+                                </div>
+                                <div class="address-item-actions d-flex gap-2 mt-2 mt-sm-0">
+                                    <button class="btn-outline-custom" onclick="openEditModal(${addr.id})"><i class="bi bi-pencil"></i> Edit</button>
+                                    <button class="btn-danger-custom" onclick="deleteAddress(${addr.id})"><i class="bi bi-trash"></i> Hapus</button>
+                                    <button class="btn-sm-success" onclick="setActiveAddress(${addr.id})"><i class="bi bi-star-fill"></i> Jadikan Aktif</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                otherHtml += `</div></div>`;
+            }
+
+            container.innerHTML = `
+                <div class="active-address-card mb-4">
+                    <div class="address-label-badge"><i class="bi bi-check-circle-fill"></i> Alamat Aktif</div>
+                    <div class="address-detail-text mb-2 text-dark">
+                        ${escapeHtml(activeAddress.address_detail || '-')}<br>
+                        ${escapeHtml(activeAddress.city_name || '-')}, ${escapeHtml(activeAddress.province_name || '-')}<br>
+                        ${activeAddress.postal_code ? '📮 Kode Pos: ' + escapeHtml(activeAddress.postal_code) : ''}
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-3 address-actions-group">
+                        <button class="btn-outline-custom" onclick="openEditModal(${activeAddress.id})"><i class="bi bi-pencil-square"></i> Edit Alamat Aktif</button>
+                        <button class="btn-danger-custom" onclick="deleteAddress(${activeAddress.id})"><i class="bi bi-trash3"></i> Hapus Alamat</button>
+                    </div>
+                </div>
+                ${otherHtml}
+            `;
+        } else {
+            container.innerHTML = `<div class="active-address-card mb-4" style="background:#FFF8E8; border-left-color:#F5A623;"><i class="bi bi-exclamation-triangle-fill"></i> <strong>Belum ada alamat toko</strong><br> Silakan isi form di bawah untuk menambahkan alamat toko.</div>`;
+        }
+    }
+
+    async function setActiveAddress(addressId) {
+        try {
+            const response = await fetch(`/api/ongkir/store-addresses/${addressId}/set-active`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                showGlobalToast('✅ Alamat berhasil dijadikan aktif!', false);
+                loadAllStoreAddresses();
+            } else {
+                showGlobalToast('❌ Gagal: ' + (result.error || 'Unknown error'), true);
+            }
+        } catch (error) {
+            showGlobalToast('❌ Terjadi kesalahan', true);
+        }
+    }
+
+    function openEditModal(addressId) {
+        const address = allStoreAddresses.find(a => a.id === addressId);
+        if (!address) return;
+        currentEditingId = addressId;
+        document.getElementById('editAddressId').value = address.id;
+        document.getElementById('editProvinceName').value = address.province_name || '';
+        document.getElementById('editCityName').value = address.city_name || '';
+        document.getElementById('editPostalCode').value = address.postal_code || '';
+        document.getElementById('editAddressDetail').value = address.address_detail || '';
+        document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').style.display = 'none';
+        currentEditingId = null;
+    }
+
+    document.getElementById('editForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const addressId = document.getElementById('editAddressId').value;
+        const data = {
+            province_name: document.getElementById('editProvinceName').value,
+            city_name: document.getElementById('editCityName').value,
+            postal_code: document.getElementById('editPostalCode').value,
+            address_detail: document.getElementById('editAddressDetail').value,
+            province_id: '0',
+            city_id: '0'
+        };
+        try {
+            const response = await fetch(`/api/ongkir/store-addresses/${addressId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                showGlobalToast('✅ Alamat berhasil diupdate!', false);
+                closeEditModal();
+                loadAllStoreAddresses();
+            } else {
+                showGlobalToast('❌ Gagal update: ' + (result.error || 'Unknown'), true);
+            }
+        } catch (error) {
+            showGlobalToast('❌ Terjadi kesalahan', true);
+        }
+    });
+
+    async function deleteAddress(addressId) {
+        if (!confirm('Apakah Anda yakin ingin menghapus alamat ini? Tindakan tidak dapat dibatalkan.')) return;
+        try {
+            const response = await fetch(`/api/ongkir/store-addresses/${addressId}`, { method: 'DELETE' });
+            const result = await response.json();
+            if (result.success) {
+                showGlobalToast('✅ Alamat berhasil dihapus!', false);
+                loadAllStoreAddresses();
+            } else {
+                showGlobalToast('❌ Gagal hapus: ' + (result.error || 'Unknown'), true);
+            }
+        } catch (error) {
+            showGlobalToast('❌ Terjadi kesalahan', true);
+        }
+    }
+
+    async function loadProvinces() {
+        try {
+            const response = await fetch('/api/ongkir/provinces');
+            const data = await response.json();
+            if (Array.isArray(data) && data.length > 0) {
+                const select = document.getElementById('province');
+                select.innerHTML = '<option value="">-- Pilih Provinsi --</option>';
+                data.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.province_id || province.id;
+                    option.textContent = province.province || province.name;
+                    select.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading provinces:', error);
+            showInlineAlert('Gagal memuat provinsi', 'error');
+        }
+    }
+
+    async function loadCities(provinceId) {
+        const select = document.getElementById('city');
+        if (!provinceId || provinceId === "") {
+            select.innerHTML = '<option value="">-- Pilih Provinsi Dulu --</option>';
+            select.disabled = true;
+            return;
+        }
+        if (citiesCache[provinceId]) {
+            populateCitySelect(select, citiesCache[provinceId]);
+            return;
+        }
+        select.innerHTML = '<option value="">⏳ Loading...</option>';
+        select.disabled = true;
+        try {
+            const response = await fetch(`/api/ongkir/cities/${provinceId}`);
+            const data = await response.json();
+            if (Array.isArray(data) && data.length > 0) {
+                citiesCache[provinceId] = data;
+                populateCitySelect(select, data);
+            } else {
+                select.innerHTML = '<option value="">Tidak ada kota</option>';
+                select.disabled = true;
+            }
+        } catch (error) {
+            console.error('Error loading cities:', error);
+            select.innerHTML = '<option value="">Error loading cities</option>';
+            select.disabled = true;
+        }
+    }
+
+    function populateCitySelect(select, cities) {
+        select.innerHTML = '<option value="">-- Pilih Kota/Kabupaten --</option>';
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city.city_id;
+            option.textContent = city.city_name;
+            option.setAttribute('data-postal', city.zip_code || '');
+            select.appendChild(option);
+        });
+        select.disabled = false;
+    }
+
+    document.getElementById('storeAddressForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const provinceSelect = document.getElementById('province');
+        const citySelect = document.getElementById('city');
+        const postalCode = document.getElementById('postal_code').value;
+        const addressDetail = document.getElementById('address_detail').value;
+
+        if (!provinceSelect.value || !citySelect.value || !addressDetail) {
+            showInlineAlert('❌ Harap lengkapi semua field!', 'error');
+            return;
+        }
+        const selectedProvince = provinceSelect.options[provinceSelect.selectedIndex];
+        const selectedCity = citySelect.options[citySelect.selectedIndex];
+        const data = {
+            province_id: provinceSelect.value,
+            province_name: selectedProvince.text,
+            city_id: citySelect.value,
+            city_name: selectedCity.text,
+            postal_code: postalCode,
+            address_detail: addressDetail
+        };
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Menyimpan...';
+        submitBtn.disabled = true;
+        try {
+            const response = await fetch('/api/ongkir/store-address', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.success) {
+                showGlobalToast('✅ Alamat toko berhasil disimpan!', false);
+                loadAllStoreAddresses();
+                document.getElementById('storeAddressForm').reset();
+                document.getElementById('city').innerHTML = '<option value="">-- Pilih Provinsi Dulu --</option>';
+                document.getElementById('city').disabled = true;
+            } else {
+                showInlineAlert('❌ Gagal menyimpan: ' + (result.error || 'Unknown'), 'error');
+            }
+        } catch (error) {
+            showInlineAlert('❌ Terjadi kesalahan', 'error');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+
+    function showInlineAlert(message, type) {
+        const alertDiv = document.getElementById('inlineAlert');
+        alertDiv.textContent = message;
+        alertDiv.className = `inline-alert ${type}`;
+        alertDiv.style.display = 'block';
+        setTimeout(() => alertDiv.style.display = 'none', 3000);
+    }
+
+    function showGlobalToast(msg, isError = false) {
+        const toast = document.getElementById('globalToast');
+        toast.textContent = msg;
+        toast.style.backgroundColor = isError ? '#F08A5D' : '#2C3E3B';
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2600);
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    document.getElementById('province').addEventListener('change', (e) => {
+        loadCities(e.target.value);
+    });
+    document.getElementById('city').addEventListener('change', (e) => {
+        const selectedOption = e.target.options[e.target.selectedIndex];
+        const postal = selectedOption.getAttribute('data-postal');
+        if (postal) document.getElementById('postal_code').value = postal;
+    });
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('editModal');
+        if (event.target === modal) closeEditModal();
+    };
+
+    loadProvinces();
+    loadAllStoreAddresses();
+</script>
+</body>
+</html>
